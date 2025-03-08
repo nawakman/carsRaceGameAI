@@ -11,32 +11,28 @@ class pictureToCircuit:
         self.tileMatrix=[["#"for y in range(self.nbScanY)] for x in range(self.nbScanX)]# a "#" means wall
         self.pointMatrix=[["y"for y in range(self.nbScanY+1)] for x in range(self.nbScanX+1)]# a "y" means accessible point and "n" means inaccessible
         
-
     def CreateCircuitFromPicture(self):
         self.FillTileMatrix()
         self.ConvertTileMatrixToPointMatrix()
-        self.PrintMatrix(self.tileMatrix)
-        self.PrintMatrix(self.pointMatrix)
+        self.FindStartAndEnd()
+        PrintMatrix(self.tileMatrix)
+        PrintMatrix(self.pointMatrix)
         self.SaveTileMatrix()
         self.SavePointMatrix()
 
     def FillTileMatrix(self):
+        self.greenPoints=[]
+        self.redPoints=[]
         for y in range(self.nbScanY):
             for x in range(self.nbScanX):
                 pixelColor=self.picture.getpixel((x*self.tileSize,y*self.tileSize))#image origin in top left corner
-                if pixelColor[0]>0:#since the circuit picture is black and white, any channel will do
+                if pixelColor[0]>0 or pixelColor[1]>0 or pixelColor[2]>0:#since the circuit picture is black and white, any channel will do
                     self.tileMatrix[x][y]=" "
 
-    def PrintMatrix(self,matrix):
-        width=len(matrix)
-        height=len(matrix[0])
-        print("_"*(width+2))
-        for y in range(height):
-            line="|"
-            for x in range(width):
-                line+=matrix[x][y]
-            print(line+"|")
-        print("‾"*(width+2))
+                if pixelColor==(0,255,0,255):
+                    self.greenPoints.append((x,y))
+                elif pixelColor==(255,0,0,255):
+                    self.redPoints.append((x,y))
 
     def SaveTileMatrix(self):
         """this matrix will be used for displaying game only"""
@@ -90,10 +86,9 @@ class pictureToCircuit:
                     currentPointState=self.pointMatrix[x+tempX][y+tempY]
                     if currentPointState=="y":#only overwrite if the point is marked accessible
                         self.pointMatrix[x+tempX][y+tempY]=points[i]
-
     
     def SavePointMatrix(self):
-        """this matrix will be used for computing AI behaviour"""
+        """this matrix will be used for computing AI behaviour and indicate start and end points"""
         with open("circuits/"+self.fileName.split(".")[0]+"Points.txt", "w") as textFile:
             print(f"{self.nbScanX+1};{self.nbScanY+1}", file=textFile)#save matrix size in first line
             for y in range(self.nbScanY+1):
@@ -101,3 +96,38 @@ class pictureToCircuit:
                 for x in range(self.nbScanX+1):
                     line+=self.pointMatrix[x][y]
                 print(line, file=textFile)
+
+    def FindStartAndEnd(self):
+        if len(self.greenPoints)==0:
+            print("missing start")
+            quit()
+        if len(self.redPoints)==0:
+            print("missing end")
+            quit()
+        
+        self.startPosition=AverageVector2(self.greenPoints)
+        self.endPosition=AverageVector2(self.redPoints)
+        print(self.startPosition)
+        self.pointMatrix[self.startPosition[0]][self.startPosition[1]]="s"
+        self.pointMatrix[self.endPosition[0]][self.endPosition[1]]="e"
+        
+
+def PrintMatrix(matrix):#helper function accessible from everywhere
+        width=len(matrix)
+        height=len(matrix[0])
+        print("_"*(width+2))
+        for y in range(height):
+            line="|"
+            for x in range(width):
+                line+=matrix[x][y]
+            print(line+"|")
+        print("‾"*(width+2))
+
+def AverageVector2(vector2Array):
+    average=[0,0]
+    for v in vector2Array:
+        average[0]+=v[0]
+        average[1]+=v[1]
+    average[0]=round(average[0]/len(vector2Array))
+    average[1]=round(average[1]/len(vector2Array))
+    return average
