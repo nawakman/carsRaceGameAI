@@ -1,20 +1,68 @@
 import os.path
 import pygame
-from time import sleep
+from math import*
 from pictureToCircuit import *
 
 class carsRace:
     def __init__(self,mapPictureFile,mapResolution,windowScaleFactor=1):
-        #mapResolution is how much you want the map to ressemble the image(low=big map and ressemble picture/high=small map approximated to big chunks)
+        """
+        mapResolution is how much you want the map to ressemble the image
+        (low=big map and ressemble picture/high=small map approximated to big chunks)
+
+        windowScaleFactor is the percentage of the screen the window will take
+        (1=max size, fill screen either vertically or horizontally depending on map, 0-1=smaller)
+        """
         self.windowScaleFactor=windowScaleFactor
+        self.lineWidth=3
         self.backgroundColor=(255,255,255)
         self.wallColor=(0,0,0)
+        self.playerMoveColor=(0,0,220)
+        self.clock=pygame.time.Clock()
+        self.playerTurn=True
+
+        self.maxSpeed=10
+        self.playerSpeed=0
+        self.playerDirection=pygame.math.Vector2(0,0)
 
         pygame.init()
+        pygame.display.set_caption("cars racing game")
 
         monitorInfo=pygame.display.Info()
         self.screenResolution=(monitorInfo.current_w,monitorInfo.current_h)#get hardware monitor resolution #must be set before reading the files
-        pygame.display.set_caption("cars racing game")
+        
+        self.LoadMap(mapPictureFile,mapResolution)#this function will set self.windowResolution used by next function
+        self.screen=pygame.display.set_mode(self.windowResolution)
+
+        #GAME LOOP
+        while True:
+            #EVENTS
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    quit()
+            #INPUTS
+            self.mousePosition=pygame.mouse.get_pos()
+            avoidFloorSnapping=self.tileSize/2
+            self.mousePosition=((self.mousePosition[0]+avoidFloorSnapping)//self.tileSize,(self.mousePosition[1]+avoidFloorSnapping)//self.tileSize)#convert mouse position to the nearest grid position instead of the smaller grid position
+            self.mouseState=pygame.mouse.get_pressed()
+            #GAMEPLAY
+            if self.playerTurn:
+                if self.mouseState[0]:#left click
+                    self.PlayerMove()
+                    self.playerTurn=False
+            else:
+                self.AskAIMove()
+                self.playerTurn=True   
+            #RENDER
+            self.DrawMap()
+            self.DrawPoints()
+            self.DrawMoves(self.playerMoves,self.playerMoveColor)
+            self.DrawNextPlayerMove()
+            self.DrawMoves(self.AIMoves,(100,100,0))
+
+            pygame.display.update()
+            self.clock.tick(60)#60fps
+
+    def LoadMap(self,mapPictureFile,mapResolution):
         self.mapMaker=pictureToCircuit(mapPictureFile,mapResolution)
 
         tileFilePath="circuits/"+mapPictureFile.split(".")[0]+".txt"
@@ -28,21 +76,6 @@ class carsRace:
             self.mapMaker.CreateCircuitFromPicture()
             self.ReadTileMapFromFile(tileFilePath)#refresh map since it has been regenerated
             self.ReadPointsFromFile(pointsFilePath)
-
-        self.screen=pygame.display.set_mode(self.windowResolution)
-
-        #GAME LOOP
-        while True:
-            # event loop
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    quit()
-            
-
-            self.DrawMap()
-            self.DrawPoints()
-            pygame.display.update()
-            sleep(1/60)#60fps
 
     def ReadTileMapFromFile(self,filePath):
         with open(filePath) as file:
@@ -71,6 +104,12 @@ class carsRace:
                 line=file.readline()
                 for x in range(self.pointMatrixSize[0]):
                     self.pointMatrix[x][y]=line[x]
+                    if line[x]=="s":
+                        self.start=pygame.math.Vector2(x,y)
+                        self.playerMoves=[self.start]
+                        self.AIMoves=[self.start]
+                    elif line[x]=="e":
+                        self.end=pygame.math.Vector2(x,y)
 
     def DrawMap(self):
         self.screen.fill(self.backgroundColor)
@@ -117,5 +156,82 @@ class carsRace:
                     pygame.draw.circle(self.screen,startPointColor,(x*self.tileSize,y*self.tileSize),8)
                 elif self.pointMatrix[x][y]=="e":
                     pygame.draw.circle(self.screen,endPointColor,(x*self.tileSize,y*self.tileSize),8)
+    
+    def PlayerMove(self):
+        thisMove,speed,direction=self.PossiblePlayerMove()
+        if self.pointMatrix[int(thisMove[0])][int(thisMove[1])]=="n":#crashed into a wall #vector2 convert components to float, so we put it bak to int
+            self.playerMoves.append(self.UncrashPlayer(thisMove))
+            self.speed=0
+            self.playerDirection=pygame.math.Vector2(0,0)
+        else:
+            self.playerMoves.append(thisMove)
+            self.playerSpeed=speed
+            self.playerDirection=direction
+    
+    def UncrashPlayer(self,lastMove):
+        quit()
+        pass
+
+    def AskAIMove(self):
+        pygame.time.delay(150)#WIP, replace with actual AI program
+
+    def DrawMoves(self,movesArray,color):
+        for i in range(len(movesArray)-1):
+            pygame.draw.line(self.screen,color,movesArray[i]*self.tileSize,movesArray[i+1]*self.tileSize,width=self.lineWidth)
+            pygame.draw.circle(self.screen,color,movesArray[i+1]*self.tileSize,3)
+    
+    def DrawNextPlayerMove(self):
+        thisMove,speed,direction=self.PossiblePlayerMove()
+        thisMove*=self.tileSize#scale from grid position to screen position
+        lastMove=pygame.math.Vector2(self.playerMoves[-1])*self.tileSize
+        pygame.draw.line(self.screen,self.playerMoveColor,lastMove,thisMove,width=self.lineWidth)
+
+    def PossiblePlayerMove(self):
+        mouseDirection=pygame.math.Vector2(self.mousePosition)-pygame.math.Vector2(self.playerMoves[-1])#vector from last player position to mouse
+        avoidFloorSnapping=45/2#for now the angle snaps to the smallest division of 45° insted of the nearest
+        #e.g. we to go up, we want to snap to 90 degrees when cursor in the 67.5-112.5 range, but for now it snap when cursor is in 90-135 range
+        angle=((round(mouseDirection.angle_to(pygame.math.Vector2(1,0))+avoidFloorSnapping)//45)*45)#angle from mouse to horizontal with origin at last player position #round to nearest 45°
+
+        minSpeed=max(1,self.playerSpeed-1)
+        maxSpeed=min(self.maxSpeed,self.playerSpeed+1)if self.playerDirection.dot(mouseDirection)>=0 else minSpeed#if mouse is not oriented in the player direction we don't want the minSpeed
+
+        if angle%90==0:
+            speed=Clamp(round(mouseDirection.magnitude()),minSpeed,maxSpeed)#we can either accelerate stay same speed or decelerate
+        else:#we deduct speed from a distance,if we go diagonally distance is longer and speed is scaled by an additional \/‾2, in this game a diagonal move cost only 1
+            speed=Clamp(round(mouseDirection.magnitude()/sqrt(2)),minSpeed,maxSpeed)#we can either accelerate stay same speed or decelerate
+
+        if self.playerDirection!=[0,0]:#if [0,0] all directions allowed, else restrict to 45° turn at most
+            playerAngle=((round(self.playerDirection.angle_to(pygame.math.Vector2(1,0)))//45)*45)#get angle compared to horizontal #round to nearest 45°
+            angle=Clamp(angle,playerAngle-45,playerAngle+45)#restrict moves to 45° turn at most
+
+        angle=angle%360#do this only once at the end
+
+        match angle:#NOTE: origin is top left so Y axis is reversed
+            case 0:
+                result=pygame.math.Vector2(1,0)
+            case 45:
+                result=pygame.math.Vector2(1,-1)
+            case 90:
+                result=pygame.math.Vector2(0,-1)
+            case 135:
+                result=pygame.math.Vector2(-1,-1)
+            case 180:
+                result=pygame.math.Vector2(-1,0)
+            case 225    :
+                result=pygame.math.Vector2(-1,1)
+            case 270:
+                result=pygame.math.Vector2(0,1)
+            case 315:
+                result=pygame.math.Vector2(1,1)
+        return result*speed+self.playerMoves[-1],speed,result#convert from local coordinates to world coordinates
+        
+def Clamp(n, min_value, max_value):
+    return max(min(n, max_value), min_value)
+
+def Limit(n,limit1,limit2):#clamp but value can be inversed at runtime
+    if limit1<=limit2:
+        return Clamp(n,limit1,limit2)
+    else:
+        return Clamp(n,limit2,limit1)
 
 game=carsRace("testCircuit.png",10,0.75)
