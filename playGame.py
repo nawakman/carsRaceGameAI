@@ -339,4 +339,4 @@ def minAngleDistance(fromAngle,toAngle):
 def From360To180Range(angle):#from 0,360 to -180,180
     return angle if angle<=180 else angle-360
 
-game=carsRace("testCircuit.png",10,0.75)
+game=carsRace("test1.png",10,0.75)
