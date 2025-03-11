@@ -1,3 +1,7 @@
+"""
+code by Theo Pernel,INSA Rennes, 2025
+"""
+
 import os.path
 import pygame
 from math import*
@@ -23,6 +27,7 @@ class carsRace:
         self.maxSpeed=10
         self.playerSpeed=0
         self.playerDirection=pygame.math.Vector2(0,0)
+        self.crashLocations=set()#set for no duplicates
 
         pygame.init()
         pygame.display.set_caption("cars racing game")
@@ -49,9 +54,13 @@ class carsRace:
                 if self.mouseState[0]:#left click
                     self.PlayerMove()
                     self.playerTurn=False
+                    if self.IsFinishLine(self.playerMoves[-1]):
+                        print("player won")
             else:
                 self.AskAIMove()
-                self.playerTurn=True   
+                self.playerTurn=True
+                if self.IsFinishLine(self.AIMoves[-1]):
+                        print("AI won")
             #RENDER
             self.DrawMap()
             self.DrawPoints()
@@ -160,17 +169,35 @@ class carsRace:
     def PlayerMove(self):
         thisMove,speed,direction=self.PossiblePlayerMove()
         if self.pointMatrix[int(thisMove[0])][int(thisMove[1])]=="n":#crashed into a wall #vector2 convert components to float, so we put it bak to int
-            self.playerMoves.append(self.UncrashPlayer(thisMove))
-            self.speed=0
+            self.UncrashPlayer(direction)
+            self.playerSpeed=0
             self.playerDirection=pygame.math.Vector2(0,0)
-        else:
+        else:#did not crash into wall
             self.playerMoves.append(thisMove)
             self.playerSpeed=speed
             self.playerDirection=direction
     
-    def UncrashPlayer(self,lastMove):
-        quit()
-        pass
+    def IsFinishLine(self, position):
+        return self.pointMatrix[int(position[0])][int(position[1])]=="e"
+
+    def UncrashPlayer(self,crashDirection):#scan each tile from last position until wall to know where the crash happened
+        scannedTile=self.playerMoves[-1].copy()#we don't want to change the player move from the array
+        while self.pointMatrix[int((scannedTile+crashDirection)[0])][int((scannedTile+crashDirection)[1])]=="y":#while not in wall
+            scannedTile=scannedTile+crashDirection
+        
+        isMoveDiagonal=crashDirection.angle_to(pygame.math.Vector2(1,0))%90!=0#if moving diagonally
+        crashTile=scannedTile+crashDirection*(0.5 if isMoveDiagonal and self.IsDiagonalTile(scannedTile+crashDirection) else 1)#if we crash in a diagonal tile we need to put the point on the diagonal wall not on the tile behind
+
+        self.crashLocations.add((crashTile[0],crashTile[1]))#the set will remove duplicates by itself #convert to tuple because Vector2 i not hashable for set
+        if scannedTile!=self.playerMoves[-1]:#if two moves are in the same position game crahes (division by 0 I guess)
+            self.playerMoves.append(scannedTile)
+
+    def IsDiagonalTile(self, position):
+        accessibleCount=0
+        for x in range(-1,2):
+            for y in range(-1,2):
+                accessibleCount+=1 if self.pointMatrix[int(position[0])+x][int(position[1])+y]=="y" else 0
+        return accessibleCount==1
 
     def AskAIMove(self):
         pygame.time.delay(150)#WIP, replace with actual AI program
@@ -179,6 +206,8 @@ class carsRace:
         for i in range(len(movesArray)-1):
             pygame.draw.line(self.screen,color,movesArray[i]*self.tileSize,movesArray[i+1]*self.tileSize,width=self.lineWidth)
             pygame.draw.circle(self.screen,color,movesArray[i+1]*self.tileSize,3)
+        for crash in self.crashLocations:
+            pygame.draw.circle(self.screen,(255,0,0),pygame.math.Vector2(crash)*self.tileSize,5)
     
     def DrawNextPlayerMove(self):
         thisMove,speed,direction=self.PossiblePlayerMove()
@@ -193,7 +222,7 @@ class carsRace:
         angle=((round(mouseDirection.angle_to(pygame.math.Vector2(1,0))+avoidFloorSnapping)//45)*45)#angle from mouse to horizontal with origin at last player position #round to nearest 45°
 
         minSpeed=max(1,self.playerSpeed-1)
-        maxSpeed=min(self.maxSpeed,self.playerSpeed+1)if self.playerDirection.dot(mouseDirection)>=0 else minSpeed#if mouse is not oriented in the player direction we don't want the minSpeed
+        maxSpeed=min(self.maxSpeed,self.playerSpeed+1)if self.playerDirection.dot(mouseDirection)>=0 else minSpeed#if mouse is not oriented in the player direction we want the minSpeed
 
         if angle%90==0:
             speed=Clamp(round(mouseDirection.magnitude()),minSpeed,maxSpeed)#we can either accelerate stay same speed or decelerate
@@ -202,7 +231,7 @@ class carsRace:
 
         if self.playerDirection!=[0,0]:#if [0,0] all directions allowed, else restrict to 45° turn at most
             playerAngle=((round(self.playerDirection.angle_to(pygame.math.Vector2(1,0)))//45)*45)#get angle compared to horizontal #round to nearest 45°
-            angle=Clamp(angle,playerAngle-45,playerAngle+45)#restrict moves to 45° turn at most
+            angle=ClampToNearestAngle(angle,playerAngle-45,playerAngle+45)
 
         angle=angle%360#do this only once at the end
 
@@ -225,13 +254,89 @@ class carsRace:
                 result=pygame.math.Vector2(1,1)
         return result*speed+self.playerMoves[-1],speed,result#convert from local coordinates to world coordinates
         
-def Clamp(n, min_value, max_value):
-    return max(min(n, max_value), min_value)
+def Clamp(x, minValue, maxValue):
+    return max(min(x, maxValue), minValue)
 
-def Limit(n,limit1,limit2):#clamp but value can be inversed at runtime
+def Limit(x,limit1,limit2):#clamp but value can be inversed at runtime
     if limit1<=limit2:
-        return Clamp(n,limit1,limit2)
+        return Clamp(x,limit1,limit2)
     else:
-        return Clamp(n,limit2,limit1)
+        return Clamp(x,limit2,limit1)
+
+def ClampToNearestAngle(angle,minAngle,maxAngle):#clamp angle #angle restriction can range 0-360 #trigonometric direction
+    angleMin=From360To180Range(minAngle%360)
+    angleMax=From360To180Range(maxAngle%360)
+    a=From360To180Range(angle%360)
+
+    if angleMax<angleMin:#restriction area passs through the problematic -180=180 area
+        if angleMax<=a<=angleMin:#angle is in the problematic -180=180 area 
+            distanceToMin=minAngleDistance(a,angleMin)
+            distanceToMax=minAngleDistance(a,angleMax)
+            #print("___\n",distanceToMin,distanceToMax)
+            return angleMin%360 if distanceToMin<=distanceToMax else angleMax%360
+        else:#angle is not in the problematic -180=180 area
+            return a%360
+          
+    else:#restriction area doe not passs through the problematic -180=180 area #UNDER THIS I OK
+        if angleMin<=a<=angleMax:#angle is not in the problematic -180=180 area 
+            return a%360
+        else:#angle is in the problematic -180=180 area
+            distanceToMin=minAngleDistance(a,angleMin)
+            distanceToMax=minAngleDistance(a,angleMax)
+            #print("___\n",distanceToMin,distanceToMax)
+            return angleMin%360 if distanceToMin<=distanceToMax else angleMax%360
+
+def ClampToNearestAngle2(alpha,A1,A2):#alternative version #exactly same behaviour #another approach
+    if (alpha<0):
+        alpha=alpha%360
+    if (A1<0):
+        A1=A1%360
+    if (A2<0):
+        A2=A2%360
+    if (A2>A1):
+        if (alpha<=A2 and alpha>=A1):
+            return alpha
+        # Calcul de A3 
+        t=(360-(A2-A1))/2
+        if (A2+t <= 360):
+            A3 = A2 + t
+        else:
+            A3 = A1 - t
+        # Redirection
+        #print("A1, A2, A3, t")
+        #print(A1,A2,A3,t)
+        if (A3>=180):
+            if (alpha<A3 and alpha>=A2):
+                return A2
+            else:
+                return A1
+        else:
+            if (alpha>A3 and alpha<=A1):
+                return A1
+            else:
+                return A2
+
+    elif(A1>A2):
+        if ((alpha<=A2 and alpha>=0) or (alpha>=A1 and alpha<=360)):
+            return alpha
+        # Calcul A3
+        t=(A1-A2)/2
+        A3=A2+t
+        # Redirection
+        #print("A1, A2, A3, t")
+        #print(A1,A2,A3,t)
+        if (alpha<A3):
+            return A2
+        return A1
+
+def minAngleDistance(fromAngle,toAngle):
+    fa=From360To180Range(fromAngle%360)
+    ta=From360To180Range(toAngle%360)
+    if ta<fa:
+        fa,ta=ta,fa
+    return min(abs(ta-fa),abs(180-ta)+abs(-180-fa))#return minimum distance, either from (fa to ta) or from (fa to 180 and -180 to ta)
+
+def From360To180Range(angle):#from 0,360 to -180,180
+    return angle if angle<=180 else angle-360
 
 game=carsRace("testCircuit.png",10,0.75)
