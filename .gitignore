@@ -1,2 +1,5 @@
 .env
 __pycache__
+cmake-build-debug
+CMakeLists.txt
+.idea

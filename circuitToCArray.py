@@ -10,7 +10,7 @@ class circuitToCArray:
     def printCCircuit(self,pToC):
         # transposee de la matrice, pour lettre en format matrice[i][j]
         matrix = list(map(list, zip(*pToC.pointMatrix)))
-        print(f"char circuit[{len(matrix[0])}][{len(matrix)}] = {{ ",end='')
+        print(f"char circuit[{len(matrix)}][{len(matrix[0])}] = {{ ",end='')
         for i, element in enumerate(matrix):
             if (i==len(matrix)-1):
                 print("{'"+"','".join(element)+"'} };")
