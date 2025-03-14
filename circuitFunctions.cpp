@@ -33,7 +33,7 @@ void Circuit::openCircuit(std::string fileName) {
     }
     int x,y;
 
-    char sep;
+    char sep;//separator
 
     file>>width>>sep>>height;
     std::cout << width << " " << sep <<" " << height << std::endl;

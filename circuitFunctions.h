@@ -5,7 +5,7 @@
 #ifndef CIRCUITFUNCTIONS_H
 #define CIRCUITFUNCTIONS_H
 
-#endif /*CIRCUITFUNCTIONS_H*/
+#endif CIRCUITFUNCTIONS_H
 
 #include <string>
 #include <vector>
