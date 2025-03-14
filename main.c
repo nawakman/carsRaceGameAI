@@ -10,6 +10,7 @@ int main(int argc, char const *argv[])
 {
 	//printf("Depart : (%d,%d)\n",*start, *(start + 1));
 	circuit_s circuit;
+	// test();
 	openCircuit("../circuits/test1Points.txt", &circuit);
 
 	for (int i = 0; i < circuit.height*circuit.width; i++) {

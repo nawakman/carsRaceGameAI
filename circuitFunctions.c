@@ -24,6 +24,12 @@ int* findStart(circuit_s circuit) {
     return depart;
 }
 
+char
+
+void test() {
+    printf("aaaaa");
+}
+
 void openCircuit(char* fileName, circuit_s* circuit) {
 
     FILE *file = fopen(fileName, "r");
