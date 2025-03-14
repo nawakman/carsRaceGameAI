@@ -31,4 +31,4 @@ typedef struct {
 
 int* findStart(circuit_s circuit);
 void openCircuit(char* fileName, circuit_s* circuit);
-void test();
+char getIJ(circuit_s* circuit_s, int i, int j);

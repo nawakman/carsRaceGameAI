@@ -24,14 +24,15 @@ int* findStart(circuit_s circuit) {
     return depart;
 }
 
-char
-
-void test() {
-    printf("aaaaa");
+// Renvoie C si le caractere est pas accessible
+char getIJ(circuit_s* circuit,int i, int j) {
+    int N = circuit->height;
+    int M = circuit->width;
+    return (i>=N || j>=M) ? 'C' : circuit->circuit[i*M+j];
 }
 
+// Ouvre un circuit et remplit N, M et le tableau dans la structure associée.
 void openCircuit(char* fileName, circuit_s* circuit) {
-
     FILE *file = fopen(fileName, "r");
     if (!file) {
         perror("Error opening file");

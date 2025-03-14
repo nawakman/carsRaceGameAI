@@ -13,9 +13,7 @@ int main(int argc, char const *argv[])
 	// test();
 	openCircuit("../circuits/test1Points.txt", &circuit);
 
-	for (int i = 0; i < circuit.height*circuit.width; i++) {
-		printf("%c", circuit.circuit[i]);
-	}
+	printf("Char at 0 0 : %c\n", getIJ(&circuit, 51, 51));
 	return 0;
 }
 
