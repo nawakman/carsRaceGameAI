@@ -22,10 +22,15 @@ void AIPlayer::generateBullshitPlayer() {
         }
     }
 }
-void AIPlayer::MovePlayer(int chosenMove){
+
+void AIPlayer::addGame(Circuit* circ) {
+    this->games.push_back(AIGame(circ));
+}
+
+void AIGame::MovePlayer(int chosenMove){
     std::array<int,2> scannedTile=position;
     //WIP
-  }
+}
 
 std::array<int,2> AIPlayer::GetNextDirectionFromDecision(int decision){
       std::array<int,2> newDirection;
@@ -34,8 +39,9 @@ std::array<int,2> AIPlayer::GetNextDirectionFromDecision(int decision){
         case 0://left
           return {};
         }*/
-  }
-int AIPlayer::GetNextSpeedFromDecision(int decision){
+}
+
+int AIGame::GetNextSpeedFromDecision(int decision){
     int minSpeed=std::max(1,speed-1);//at no point your next speed should be 0
     int speedOffset=(decision/3)-1;
     if((speedOffset==-1 && (speed==0 || speed==1)) || (speedOffset==1 && speed==NB_SPEEDS)){
@@ -44,10 +50,9 @@ int AIPlayer::GetNextSpeedFromDecision(int decision){
     return std::clamp(speed+speedOffset,minSpeed,NB_SPEEDS);//limit speed
 }
 
-
-int AIPlayer::GetSpeed() {
+int AIGame::GetSpeed() {
     return speed;
 }
-void AIPlayer::SetSpeed(int x) {
+void AIGame::SetSpeed(int x) {
     speed=x;
 }

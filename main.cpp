@@ -6,20 +6,25 @@
 #include <iostream>
 
 #include "AIPlayer.h"
-#include "circuitFunctions.h"
 
 int main(int argc, char const *argv[])
 {
 	/*SAMUEL PLAYGROUND*/
-	/*srand(time(NULL));
-	Circuit circuit;
-	circuit.openCircuit("../circuits/test1Points.txt");
+	srand(time(NULL));
+	Circuit test1 = Circuit("../circuits/test1Points.txt");
 
-	circuit.affiche();
+	AIPlayer ai;
+	ai.generateBullshitPlayer();
+	ai.addGame(&test1);
+	// ai.playGames()
+	// ai.score
+	// ai.games[X].getMoves
 
-	circuit.findStart();*/
+	// Dans l'idee, le but final c'est qu'on ait une giga classe trainer d'ia,
+	// qu'elle crée genre 10 AIGames, qu'elle les mett
 
 	/*THEO PLAYGROUND*/
+	/* Deso j'ai tout cassé mais c'est pour le mieux
 	AIPlayer ai;
 	std::cout<<"initial speed: "<<ai.GetSpeed()<<std::endl;
 	ai.SetSpeed(ai.GetNextSpeedFromDecision(1));
@@ -28,6 +33,8 @@ int main(int argc, char const *argv[])
 		ai.SetSpeed(ai.GetNextSpeedFromDecision(7));
 		std::cout<<"increased: "<<ai.GetSpeed()<<std::endl;
 	}
+	*/
+
 	return 0;
 }
 

@@ -7,15 +7,22 @@
 #include <iostream>
 #include <vector>
 
-// Trouve le depart et remplit le tableau start de la classe
+// Finds start, set to -1,-1 if not found
 void Circuit::findStart() {
+    bool found = false;
     for (int i=0;i<circuit.size();i++) {
         for (int j=0;j<circuit[i].size();j++) {
             if (circuit[i][j] == 's') {
                 start[0]=i;
                 start[1]=j;
+                found = true;
             }
         }
+    }
+    if (!found) {
+        std::cout<<"No start, something is wrong"<<std::endl;
+        start[0]=-1;
+        start[1]=-1;
     }
 }
 
@@ -36,10 +43,7 @@ void Circuit::openCircuit(std::string fileName) {
     char sep;//separator
 
     file>>width>>sep>>height;
-    std::cout << width << " " << sep <<" " << height << std::endl;
     circuit.resize(height);
-    // Now read and print the rest of the file
-    printf("Reading the rest of the file:\n");
 
     std::string tmp;
     std::getline(file, tmp);
