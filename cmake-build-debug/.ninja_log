@@ -1,0 +1,24 @@
+# ninja log v6
+30	52	1741729689806461897	carsRaceGameAI	68ab7219fd6d471e
+1	13	1741728312520166793	CMakeFiles/carsRaceGameAI.dir/circuitFunctions.c.o	e4be880741f91f9d
+1	15	1741729832990892156	build.ninja	976e08a1971b3f52
+2	22	1741728312520166793	CMakeFiles/carsRaceGameAI.dir/test.c.o	aa5181c092f4e115
+1	30	1741729689778461821	CMakeFiles/carsRaceGameAI.dir/main.c.o	e5ca2858cb037cad
+1	39	1741730517544900366	CMakeFiles/carsRaceGameAI.dir/circuitFunctions.c.o	e4be880741f91f9d
+1	23	1741730674401413185	CMakeFiles/carsRaceGameAI.dir/main.c.o	e5ca2858cb037cad
+23	40	1741730674425413268	carsRaceGameAI	aa06ffd48cc41261
+2	24	1741731347752103702	CMakeFiles/carsRaceGameAI.dir/circuitFunctions.c.o	e4be880741f91f9d
+1	38	1741731623321318497	CMakeFiles/carsRaceGameAI.dir/main.c.o	e5ca2858cb037cad
+38	66	1741731623361318676	carsRaceGameAI	aa06ffd48cc41261
+1	31	1741731685521597103	CMakeFiles/carsRaceGameAI.dir/main.c.o	e5ca2858cb037cad
+32	54	1741731685553597247	carsRaceGameAI	aa06ffd48cc41261
+1	28	1741731700489664340	CMakeFiles/carsRaceGameAI.dir/main.c.o	e5ca2858cb037cad
+28	42	1741731700517664466	carsRaceGameAI	aa06ffd48cc41261
+1	38	1741731773905995103	CMakeFiles/carsRaceGameAI.dir/circuitFunctions.c.o	e4be880741f91f9d
+38	60	1741731773941995265	carsRaceGameAI	aa06ffd48cc41261
+1	31	1741731795110090930	CMakeFiles/carsRaceGameAI.dir/circuitFunctions.c.o	e4be880741f91f9d
+31	49	1741731795138091057	carsRaceGameAI	aa06ffd48cc41261
+1	32	1741731901198571937	CMakeFiles/carsRaceGameAI.dir/circuitFunctions.c.o	e4be880741f91f9d
+32	48	1741731901230572082	carsRaceGameAI	aa06ffd48cc41261
+1	35	1741731909010607457	CMakeFiles/carsRaceGameAI.dir/circuitFunctions.c.o	e4be880741f91f9d
+35	54	1741731909046607620	carsRaceGameAI	aa06ffd48cc41261

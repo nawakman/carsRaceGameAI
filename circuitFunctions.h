@@ -26,4 +26,12 @@ typedef struct {
     int depart[2];
 } circuit_s;
 
+typedef struct {
+    char* circuit;
+    int width;
+    int height;
+    int depart[2];
+} circuit_s2;
+
 int* findStart(circuit_s circuit);
+char* openCircuit(char* fileName);

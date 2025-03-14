@@ -22,3 +22,35 @@ int* findStart(circuit_s circuit) {
     depart[1]=-1;
     return depart;
 }
+
+char* openCircuit(char* fileName, circuit_s2* circuit) {
+    FILE *file = fopen(fileName, "r");
+    if (!file) {
+        perror("Error opening file");
+        return 1;
+    }
+    int x,y;
+
+    char buffer[256];
+
+    // Read coords
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        printf("File is empty or error reading the first line.\n");
+        fclose(file);
+        return 1;
+    }
+
+    if (sscanf(buffer, "%d;%d", &x, &y) != 2) {
+        printf("Couldn't read coordinates");
+        exit(1);
+    };
+
+    // Now read and print the rest of the file
+    printf("Reading the rest of the file:\n");
+    while (fgets(buffer, sizeof(buffer), file)) {
+        printf("%s", buffer);  // Process the line however you want
+    }
+
+    fclose(file);
+    return 0;
+}
