@@ -22,13 +22,18 @@
 
 #endif /*CIRCUITFUNCTIONS_H*/
 
-typedef struct {
-    char* circuit;
+#include <string>
+#include <vector>
+
+class Circuit {
     int width;
     int height;
     int depart[2];
-} circuit_s;
+    std::vector<std::vector <char>> circuit;
+public:
+    void affiche() const;
+    //int* findStart();
+    void openCircuit(std::string fileName);
+    char getIJ(int i, int j) const;
+};
 
-int* findStart(circuit_s circuit);
-void openCircuit(char* fileName, circuit_s* circuit);
-char getIJ(circuit_s* circuit_s, int i, int j);
