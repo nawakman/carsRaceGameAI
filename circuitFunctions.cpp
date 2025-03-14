@@ -7,6 +7,18 @@
 #include <iostream>
 #include <vector>
 
+// Trouve le depart et remplit le tableau start de la classe
+void Circuit::findStart() {
+    for (int i=0;i<circuit.size();i++) {
+        for (int j=0;j<circuit[i].size();j++) {
+            if (circuit[i][j] == 's') {
+                start[0]=i;
+                start[1]=j;
+            }
+        }
+    }
+}
+
 // Renvoie C si le caractere est pas accessible
 char Circuit::getIJ(int i, int j) const {
     return circuit[i][j];

@@ -9,11 +9,13 @@
 
 int main(int argc, char const *argv[])
 {
-	Circuit circuit2;
-	circuit2.openCircuit("../circuits/test1Points.txt");
+	srand(time(NULL));
+	Circuit circuit;
+	circuit.openCircuit("../circuits/test1Points.txt");
 
-	circuit2.affiche();
+	circuit.affiche();
 
+	circuit.findStart();
 	return 0;
 }
 
