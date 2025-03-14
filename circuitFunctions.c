@@ -24,10 +24,11 @@ int* findStart(circuit_s circuit) {
 }
 
 char* openCircuit(char* fileName, circuit_s2* circuit) {
+
     FILE *file = fopen(fileName, "r");
     if (!file) {
         perror("Error opening file");
-        return 1;
+        return "Non";
     }
     int x,y;
 
@@ -37,13 +38,15 @@ char* openCircuit(char* fileName, circuit_s2* circuit) {
     if (fgets(buffer, sizeof(buffer), file) == NULL) {
         printf("File is empty or error reading the first line.\n");
         fclose(file);
-        return 1;
+        return "Non";
     }
 
     if (sscanf(buffer, "%d;%d", &x, &y) != 2) {
         printf("Couldn't read coordinates");
         exit(1);
     };
+    circuit->width=x;
+    circuit->height=y;
 
     // Now read and print the rest of the file
     printf("Reading the rest of the file:\n");
@@ -52,5 +55,5 @@ char* openCircuit(char* fileName, circuit_s2* circuit) {
     }
 
     fclose(file);
-    return 0;
+    return "AA";
 }

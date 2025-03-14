@@ -34,4 +34,4 @@ typedef struct {
 } circuit_s2;
 
 int* findStart(circuit_s circuit);
-char* openCircuit(char* fileName);
+char* openCircuit(char* fileName, circuit_s2* circuit);

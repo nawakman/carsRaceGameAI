@@ -15,6 +15,9 @@ int main(int argc, char const *argv[])
 	memcpy(circ.circuit, circuit, sizeof(circuit));
 	int* start = findStart(circ);
 	printf("Depart : (%d,%d)",*start, *(start + 1));
+	circuit_s2 circuit2;
+	openCircuit("../circuits/test1Points.txt", &circuit2);
+
 	return 0;
 }
 
