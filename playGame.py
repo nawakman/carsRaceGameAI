@@ -166,31 +166,37 @@ class carsRace:
                 elif self.pointMatrix[x][y]=="e":
                     pygame.draw.circle(self.screen,endPointColor,(x*self.tileSize,y*self.tileSize),8)
     
-    def PlayerMove(self):
-        thisMove,speed,direction=self.PossiblePlayerMove()
-        if self.pointMatrix[int(thisMove[0])][int(thisMove[1])]=="n":#crashed into a wall #vector2 convert components to float, so we put it bak to int
-            self.UncrashPlayer(direction)
-            self.playerSpeed=0
-            self.playerDirection=pygame.math.Vector2(0,0)
-        else:#did not crash into wall
-            self.playerMoves.append(thisMove)
-            self.playerSpeed=speed
-            self.playerDirection=direction
+    def PlayerMove(self):#first get the actual move, then apply it
+        position,speed,direction=self.PossiblePlayerMove()
+        self.MovePlayer(speed,direction)
+
+    def MovePlayer(self,newSpeed,newDirection):#scan each tile from last position to final position to check if a crash happened
+        scannedTile=self.playerMoves[-1].copy()#we don't want to change the player move from the array
+        
+        for i in range(newSpeed):
+            if self.pointMatrix[int((scannedTile+newDirection)[0])][int((scannedTile+newDirection)[1])]=="n":#if next move will crash in wall then put player just before the wall
+                isMoveDiagonal=newDirection.angle_to(pygame.math.Vector2(1,0))%90!=0#if moving diagonally
+                crashPosition=scannedTile+newDirection*(0.5 if isMoveDiagonal and self.IsDiagonalTile(scannedTile+newDirection) else 1)#if we crash in a diagonal tile we need to put the point on the diagonal wall not on the tile behind
+                self.crashLocations.add((crashPosition[0],crashPosition[1]))#the set will remove duplicates by itself #convert to tuple because Vector2 i not hashable for set
+                
+                #if a crash is detected then the actual scannedTile is the position right before the wall
+                self.playerSpeed=0
+                self.playerDirection=pygame.math.Vector2(0,0)
+                if scannedTile!=self.playerMoves[-1]:#if two moves are in the same position game crahes (division by 0 I guess)
+                    self.playerMoves.append(scannedTile)
+                return
+            else:
+                scannedTile=scannedTile+newDirection#continue checking the path
+        
+        #if no crah were detected, scannedTile is now at the good position
+        self.playerSpeed=newSpeed
+        self.playerDirection=newDirection
+        self.playerMoves.append(scannedTile)
     
+        
     def IsFinishLine(self, position):
         return self.pointMatrix[int(position[0])][int(position[1])]=="e"
-
-    def UncrashPlayer(self,crashDirection):#scan each tile from last position until wall to know where the crash happened
-        scannedTile=self.playerMoves[-1].copy()#we don't want to change the player move from the array
-        while self.pointMatrix[int((scannedTile+crashDirection)[0])][int((scannedTile+crashDirection)[1])]=="y":#while not in wall
-            scannedTile=scannedTile+crashDirection
         
-        isMoveDiagonal=crashDirection.angle_to(pygame.math.Vector2(1,0))%90!=0#if moving diagonally
-        crashTile=scannedTile+crashDirection*(0.5 if isMoveDiagonal and self.IsDiagonalTile(scannedTile+crashDirection) else 1)#if we crash in a diagonal tile we need to put the point on the diagonal wall not on the tile behind
-
-        self.crashLocations.add((crashTile[0],crashTile[1]))#the set will remove duplicates by itself #convert to tuple because Vector2 i not hashable for set
-        if scannedTile!=self.playerMoves[-1]:#if two moves are in the same position game crahes (division by 0 I guess)
-            self.playerMoves.append(scannedTile)
 
     def IsDiagonalTile(self, position):
         accessibleCount=0
