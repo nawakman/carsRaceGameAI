@@ -41,30 +41,37 @@ constexpr int NB_MAPS=1;
 class AIGame {
     std::array<int,2> position;//stores current position
     std::array<int,2> direction={0,0};//stores current ABSOLUTE direction
+    int angle=0;//stores current angle compared to trigonometric origin //same information as direction
     int speed=0;//stores current speed
-    std::vector <int[2]>AIMoves;//to store every player moves on the current map //then returned to python script to visualize path
-    Circuit* circuit;
-    bool invalidPosition(int i, int j) const;
-    // We need the player to have access to the grid
-    AIPlayer* player;
+    std::vector <std::array<int,2>> AIMoves;//to store every player moves on the current map //then returned to python script to visualize path
+    Circuit* circuitRef;// We need the player to have access to the grid
+    AIPlayer* playerRef;
 
 public:
-    // Only for testing, will remove later :
-    void setDirection(int i, int j);
-    std::array<int,3> getDistanceCaptors();
     // Constructor
     AIGame(Circuit* circuit, AIPlayer* player) {
-        this->player = player;
-        this->circuit = circuit;
+        this->playerRef = player;
+        this->circuitRef = circuit;//je comprenais pas j'essayait de faire circuit[i][j] mais eft c'est une ref a l'OBJET Circuit qui posède circuit
         position = circuit->start;
     }
+
+    static std::array<int,2> AngleToDirection(int angle);
+    std::array<int,3> getDistanceCaptors() const;
+    bool invalidPosition(int i, int j) const;
     // We need game related context to make a decision.
     int getDistanceToFinish();
     int takeDecision();
-    int GetNextSpeedFromDecision(int decision);
-    void MovePlayer(int decision);
-    int GetSpeed();
+    int GetNextSpeedFromDecision(int decision) const;
+    std::array<int,2> GetNextDirectionFromDecision(int decision) const;//compute next direction vector u=if we choose decision x
+    void MoveAIPlayer(int decision);
+    //if possible put getters and setters at the end
+    void setDirection(int i, int j);// Only for testing, will remove later :
+    std::array<int,2> GetPosition() const;
+    void SetPosition(std::array<int,2> x);
+    int GetSpeed() const;
     void SetSpeed(int x);
+    int GetAngle() const;
+    void SetAngle(int x);
 };
 
 class AIPlayer {
@@ -77,9 +84,11 @@ public:
     void generateBullshitPlayer();
     void addGame(Circuit* circ);
     AIGame* getGame(int i);
-    // I don't get this one
-    std::array<int,2> GetNextDirectionFromDecision(int decision);
 
 };
+
+inline int PositiveModulo(const int x, const int mod) {//https://stackoverflow.com/questions/14997165/fastest-way-to-get-a-positive-modulo-in-c-c
+    return (x % mod + mod) % mod;//the C++ modulo doesn't have the same behaviour as the python one, it can return a negative value
+}
 
 #endif

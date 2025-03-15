@@ -16,10 +16,10 @@ class Circuit {
     int height;
     std::vector<std::vector <char>> circuit;
     void findStart();
-    void openCircuit(std::string fileName);
+    void openCircuit(const std::string& fileName);
 
 public:
-    Circuit(std::string fileName) {
+    Circuit(const std::string& fileName) {
         openCircuit(fileName);
         findStart();
     }

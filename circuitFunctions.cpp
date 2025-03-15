@@ -32,14 +32,12 @@ char Circuit::getIJ(int i, int j) const {
 }
 
 // Ouvre un circuit et remplit N, M et le tableau dans la structure associée.
-void Circuit::openCircuit(std::string fileName) {
+void Circuit::openCircuit(const std::string& fileName) {
     std::ifstream file(fileName);
     if (!file) {
         perror("Error opening file");
         exit(EXIT_FAILURE);
     }
-    int x,y;
-
     char sep;//separator
 
     file>>width>>sep>>height;

@@ -10,7 +10,7 @@
 int main(int argc, char const *argv[])
 {
 	/*SAMUEL PLAYGROUND*/
-	srand(time(NULL));
+	/*srand(time(NULL));
 	Circuit test1 = Circuit("../circuits/test1Points.txt");
 
 	AIPlayer ai;
@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
 	std::array<int, 3> distanceCaptors{};
 	distanceCaptors = ai.getGame(0)->getDistanceCaptors();
 	std::cout << "Captors for direction 0 -1" << std::endl;
-	std::cout << distanceCaptors[0] << "," << distanceCaptors[1] << "," << distanceCaptors[2] << std::endl;
+	std::cout << distanceCaptors[0] << "," << distanceCaptors[1] << "," << distanceCaptors[2] << std::endl;*/
 	// ai.playGames()
 	// ai.score
 	// ai.games[X].getMoves
@@ -29,16 +29,34 @@ int main(int argc, char const *argv[])
 	// qu'elle crée genre 10 AIGames, qu'elle les mett
 
 	/*THEO PLAYGROUND*/
-	/* Deso j'ai tout cassé mais c'est pour le mieux
-	AIPlayer ai;
-	std::cout<<"initial speed: "<<ai.GetSpeed()<<std::endl;
-	ai.SetSpeed(ai.GetNextSpeedFromDecision(1));
-	std::cout<<"decreased: "<<ai.GetSpeed()<<std::endl;//should print complaint message
-	for(int i=1;i<15;i++) {
-		ai.SetSpeed(ai.GetNextSpeedFromDecision(7));
-		std::cout<<"increased: "<<ai.GetSpeed()<<std::endl;
+	/*//TEST AngleToDirection
+	 for(int i = -360; i < 360; i=i+10) {
+		std::array<int,2> tmp=AIGame::AngleToDirection(i);
+		std::cout<<"angle: "<<i<<" direction: "<<tmp.at(0)<<","<<tmp.at(1)<<std::endl;
 	}
 	*/
+
+	/*//TEST GetNextDirectionFromDecision
+	Circuit test1 = Circuit("../circuits/test1Points.txt");
+	AIPlayer ai;
+	ai.addGame(&test1);
+	for (int i = 0; i <7 ; i++) {
+		std::array<int,2> tmp=ai.getGame(0)->GetNextDirectionFromDecision(i);
+		std::cout<<"playerAngle: "<<ai.getGame(0)->GetAngle()<<" direction: "<<tmp[0]<<";"<<tmp[1]<<std::endl;
+	}*/
+
+	//TEST Move //I CANNOT DEBUG THIS WITHOUT VISUALIZING IT
+	Circuit test1 = Circuit("../circuits/test1Points.txt");
+	AIPlayer ai;
+	ai.addGame(&test1);
+	int moves[6]={6,6,7,7,7,7};
+	for (int i = 0; i <6 ; i++) {
+		std::array<int,2> tmp=ai.getGame(0)->GetPosition();
+		std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<" nextDecision: "<<moves[i]<<std::endl;
+		ai.getGame(0)->MoveAIPlayer(moves[i]);
+	}
+	std::array<int,2> tmp=ai.getGame(0)->GetPosition();
+	std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<std::endl;
 
 	return 0;
 }
