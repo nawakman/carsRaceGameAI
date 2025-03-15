@@ -24,6 +24,7 @@
 #define GO_RIGHT_FASTER 8
 
 
+class AIPlayer;
 
 constexpr int DIRECTION_SENSOR_MAX_NB=9;
 constexpr int ANGLES=8;
@@ -43,9 +44,17 @@ class AIGame {
     int speed=0;//stores current speed
     std::vector <int[2]>AIMoves;//to store every player moves on the current map //then returned to python script to visualize path
     Circuit* circuit;
+    bool invalidPosition(int i, int j) const;
+    // We need the player to have access to the grid
+    AIPlayer* player;
+
 public:
+    // Only for testing, will remove later :
+    void setDirection(int i, int j);
+    std::array<int,3> getDistanceCaptors();
     // Constructor
-    AIGame(Circuit* circuit) {
+    AIGame(Circuit* circuit, AIPlayer* player) {
+        this->player = player;
         this->circuit = circuit;
         position = circuit->start;
     }
@@ -60,13 +69,14 @@ public:
 
 class AIPlayer {
     char decisionGrid[DIRECTION_SENSOR_MAX_NB][DIRECTION_SENSOR_MAX_NB][DIRECTION_SENSOR_MAX_NB][ANGLES][NB_SPEEDS];
-    int meanScore;
+    int meanScore=-1;
     std::vector<AIGame> games;
 
 public:
 
     void generateBullshitPlayer();
     void addGame(Circuit* circ);
+    AIGame* getGame(int i);
     // I don't get this one
     std::array<int,2> GetNextDirectionFromDecision(int decision);
 

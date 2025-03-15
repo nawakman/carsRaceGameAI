@@ -24,6 +24,8 @@ public:
         findStart();
     }
     std::array<int,2> start;
+    int getHeight() const;
+    int getWidth() const;
     void affiche() const;
     char getIJ(int i, int j) const;
 };

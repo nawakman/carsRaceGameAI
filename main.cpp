@@ -16,6 +16,11 @@ int main(int argc, char const *argv[])
 	AIPlayer ai;
 	ai.generateBullshitPlayer();
 	ai.addGame(&test1);
+	ai.getGame(0)->setDirection(0,-1);
+	std::array<int, 3> distanceCaptors{};
+	distanceCaptors = ai.getGame(0)->getDistanceCaptors();
+	std::cout << "Captors for direction 0 -1" << std::endl;
+	std::cout << distanceCaptors[0] << "," << distanceCaptors[1] << "," << distanceCaptors[2] << std::endl;
 	// ai.playGames()
 	// ai.score
 	// ai.games[X].getMoves

@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cstdlib>
 
-// Full random player
+// Full random player, used for gen 1.
 void AIPlayer::generateBullshitPlayer() {
     for (int i=0; i<DIRECTION_SENSOR_MAX_NB; i++) {
         for (int j=0; j<DIRECTION_SENSOR_MAX_NB; j++) {
@@ -24,12 +24,7 @@ void AIPlayer::generateBullshitPlayer() {
 }
 
 void AIPlayer::addGame(Circuit* circ) {
-    this->games.push_back(AIGame(circ));
-}
-
-void AIGame::MovePlayer(int chosenMove){
-    std::array<int,2> scannedTile=position;
-    //WIP
+    this->games.push_back(AIGame(circ, this));
 }
 
 std::array<int,2> AIPlayer::GetNextDirectionFromDecision(int decision){
@@ -39,6 +34,11 @@ std::array<int,2> AIPlayer::GetNextDirectionFromDecision(int decision){
         case 0://left
           return {};
         }*/
+}
+
+void AIGame::MovePlayer(int chosenMove){
+    std::array<int,2> scannedTile=position;
+    //WIP
 }
 
 int AIGame::GetNextSpeedFromDecision(int decision){
@@ -53,6 +53,78 @@ int AIGame::GetNextSpeedFromDecision(int decision){
 int AIGame::GetSpeed() {
     return speed;
 }
+
 void AIGame::SetSpeed(int x) {
     speed=x;
+}
+
+// Returns true if position is invalid
+bool AIGame::invalidPosition(int i, int j) const {
+    return i<0||i>circuit->getHeight()||j<0||j>circuit->getWidth();
+}
+
+void AIGame::setDirection(int i, int j) {
+    this->direction[0]=i;
+    this->direction[1]=j;
+}
+
+
+// Distance to obstacle : 1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18-19---------
+// Captor value         : 1-2-3-4-5-6-6-7-7-7 -8 -8 -8 -8 -9 -9 9 9 9 9 9
+std::array<int, 3> AIGame::getDistanceCaptors() {
+    std::array<int, 8> distanceCaptorsAllDirections{0};
+    std::array<int, 3> distanceCaptors{0};
+    int radius=1;
+    int direction=0;
+
+    while (radius<=14) {
+        for (auto [x, y] : { std::pair{0,1},{-1,1},{-1,0},{-1,-1},{0,-1},{1,-1},{1,0},{1,1} }) {
+            // If we haven't processed this direction already
+            if (distanceCaptorsAllDirections[direction]==0) {
+                // std::cout << "Processing new direction"<<std::endl;
+                if (invalidPosition(position[0]+x*radius,position[1]+y*radius)) {
+                    // std::cout << "Invalid position ! " << position[0]+y << " : " << position[1]+x << std::endl;
+                    distanceCaptorsAllDirections[direction]=radius;
+                }
+                // If position is valid check if there's an 'n' on the tile
+                else {
+                    if (this->circuit->getIJ(position[0]+x*radius,position[1]+y*radius)=='n') {
+                        distanceCaptorsAllDirections[direction]=radius;
+                    }
+                }
+            }
+            direction+=1;
+        }
+        direction=0;
+        radius+=1;
+    }
+    // Debug
+    /*
+    std::cout << "Output for distance : " << std::endl;
+    for (int i=0;i<distanceCaptorsAllDirections.size();i++) {
+        std::cout << i << ":" << distanceCaptorsAllDirections[i] << "\n";
+    }
+    */
+    // TODO chose how we implement the initial direction, for now I'm doing it this way
+    int i=0;
+    if (this->direction != std::array<int,2> {0,0}) {
+        for (auto [x, y] : { std::pair{0,1},{-1,1},{-1,0},{-1,-1},{0,-1},{1,-1},{1,0},{1,1} }) {
+            if (this->direction[0]==x && this->direction[1]==y) {
+                // Case 0 is left, so direction + 1
+                distanceCaptors[0]=distanceCaptorsAllDirections[(i+1)%8];
+                distanceCaptors[1]=distanceCaptorsAllDirections[i];
+                distanceCaptors[2]=distanceCaptorsAllDirections[((i-1)%8 + 8)%8];
+            }
+            i++;
+        }
+    }
+    return distanceCaptors;
+}
+
+AIGame* AIPlayer::getGame(int i) {
+    if (i>=games.size()) {
+        std::cout << "Game index out of bounds" << std::endl;
+        return NULL;
+    }
+    return &games[i];
 }

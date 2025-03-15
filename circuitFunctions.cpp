@@ -63,3 +63,11 @@ void Circuit::affiche () const {
         std::cout<<"\n";
     }
 }
+
+int Circuit::getWidth() const {
+    return width;
+}
+
+int Circuit::getHeight() const {
+    return height;
+}
