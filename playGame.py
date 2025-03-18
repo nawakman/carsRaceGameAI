@@ -106,7 +106,7 @@ class carsRace:
                 if event.type == pygame.QUIT:
                     quit()
             #GAMEPLAY
-            pygame.time.delay(1000)#display a new move each x milliseconds
+            pygame.time.delay(100)#display a new move each x milliseconds
             self.currentTurn+=1
             print(self.currentTurn)
             #RENDER
@@ -133,7 +133,7 @@ class carsRace:
 
         filePath="AI/"+AIFile
         if not os.path.isfile(filePath):#if map text files does not already exists then generate
-            print("AI file"+filePath+"does not exist")
+            print("AI file"+filePath+" does not exist")
             quit()
         with open(filePath) as file:
             mapNameFromFile=file.readline().rstrip("\n")#first line contains the name of the map the AI was trained on
@@ -439,6 +439,6 @@ def From360To180Range(angle):#from 0,360 to -180,180
     return angle if angle<=180 else angle-360
 
 game=carsRace("test1.png",10,0.75)
-game.Play("alone")
-#game.Play("vsAI","handMadeTest.txt")
-#game.Play("AI","handMadeTest.txt")
+#game.Play("alone")
+#game.Play("vsAI","../AI/test1-gen0.txt")
+game.Play("AI","../AI/test1-gen0.txt")

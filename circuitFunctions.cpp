@@ -33,6 +33,10 @@ char Circuit::getIJ(int i, int j) const {
 
 // Ouvre un circuit et remplit N, M et le tableau dans la structure associée.
 void Circuit::openCircuit(const std::string& fileName) {
+    mapName=fileName.substr(fileName.rfind('/') + 1);//get last filename after last "/" //https://stackoverflow.com/questions/12261657/how-to-get-last-element-in-tokenized-string-in-c-separated-by
+    mapName=mapName.substr(0, mapName.find("Points.txt")); //get mapName before this string //used to name saved AI files
+    std::cout<<"map "<<mapName<<" loaded"<<std::endl;
+
     std::ifstream file(fileName);
     if (!file) {
         perror("Error opening file");

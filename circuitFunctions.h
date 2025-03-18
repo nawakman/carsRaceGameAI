@@ -23,6 +23,7 @@ public:
         openCircuit(fileName);
         findStart();
     }
+    std::string mapName;
     std::array<int,2> start;
     int getHeight() const;
     int getWidth() const;

@@ -2,27 +2,30 @@
 // Created by samsam on 3/14/25.
 */
 
-#include "AIPlayer.h"
+#include "AIBehaviour.h"
 
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 #include <cstdlib>
+#include <string>
+#include <sstream>
 
+#include <filesystem> // C++17 and later
 /*==============AI GAME==============*/
-std::array<int,2> AIGame::GetNextDirectionFromDecision(const int decision) const{
-    const int angleOffset=45*((decision%3)-1);
-      return AngleToDirection(angle+angleOffset);
-}
 
 void AIGame::MoveAIPlayer(const int decision){
     std::array<int,2> scannedTile=position;//cpp std::array makes deep copy on assignment
-    const std::array<int,2> newDirection=GetNextDirectionFromDecision(decision);
-    for(int i=0;i<GetNextSpeedFromDecision(decision);i++) {
+    const int newAngle=GetNextAngleFromDecision(decision);
+    const std::array<int,2> newDirection=AngleToDirection(newAngle);
+    int newSpeed=GetNextSpeedFromDecision(decision);
+    for(int i=0;i<newSpeed;i++) {
         std::array<int,2> nextTileInDirection={scannedTile[0]+newDirection[0],scannedTile[1]+newDirection[1]};
         if (circuitRef->getIJ(nextTileInDirection[0],nextTileInDirection[1])=='n'){//if next move will crash in wall then put player just before the wall
             std::cout<<"dumbass AI crahed into a wall what a failure!!!"<<std::endl;
             speed=0;
             direction={0,0};
+            angle=-1;
             position=scannedTile;//if a crash is detected then the actual scannedTile is the position right before the wall
             if(scannedTile!=AIMoves.back()) {//don't put two same position else python visualiser will crash (division by 0 I guess)
                 AIMoves.push_back(scannedTile);//if a crash is detected then the actual scannedTile is the position right before the wall
@@ -31,21 +34,38 @@ void AIGame::MoveAIPlayer(const int decision){
         }else{//if no crash were detected, scannedTile is now at the good position
             scannedTile=nextTileInDirection;
         }
-        speed=GetNextSpeedFromDecision(decision);//if no crash were detected, scannedTile is now at the good position
-        direction=GetNextDirectionFromDecision(decision);
-        position=scannedTile;
-        AIMoves.push_back(scannedTile);
     }
-
+    speed=newSpeed;//if no crash were detected, scannedTile is now at the good position
+    angle=newAngle;
+    direction=newDirection;
+    position=scannedTile;
+    AIMoves.push_back(scannedTile);
 }
 
 int AIGame::GetNextSpeedFromDecision(const int decision) const{
+    if(decision<8) {
+        return 1;
+    }
     const int minSpeed=std::max(1,speed-1);//at no point your next speed should be 0
-    const int speedOffset=(decision/3)-1;
+    const int speedOffset=(decision/3)-4;
     if((speedOffset==-1 && (speed==0 || speed==1)) || (speedOffset==1 && speed==NB_SPEEDS)){
-        std::cout<<"AI tried to go slower than (1 or 0) or faster than NB_SPEEDS , shouldn't happen since you are supposed to remove illegal moves"<<std::endl;
+        std::cout<<"ILLEGAL MOVE, AI tried to go slower than (1 or 0) or faster than NB_SPEEDS"<<std::endl;
     }
     return std::clamp(speed+speedOffset,minSpeed,NB_SPEEDS);//limit speed
+}
+
+int AIGame::GetNextAngleFromDecision(const int decision) const{
+    if(decision<8) {//decision 0-7 means the player is stopped and can choose any direction
+        if(speed>0) {
+            std::cout<<"ILLEGAL MOVE, AI is not stopped but tries to force a new direction"<<std::endl;
+        }
+        return 45*decision;
+    }
+    if(speed==0) {
+        std::cout<<"ILLEGAL MOVE, AI is stopped but tries to steer left or right"<<std::endl;
+    }
+    const int angleOffset=45*(decision%3);//decision 8-15 are when player is already moving
+    return angle+angleOffset;
 }
 
 // Returns true if position is invalid
@@ -53,7 +73,7 @@ bool AIGame::invalidPosition(const int i, const int j) const {
     return i<0||i>circuitRef->getHeight()||j<0||j>circuitRef->getWidth();
 }
 
-std::array<int,2> AIGame::AngleToDirection(const int angle) {
+std::array<int,2> AIGame::AngleToDirection(const int angle) {//in degrees
     constexpr std::array<std::array<int,2>,8> angleToDirectionLUT={//lookup table faster than switch
         std::array<int,2>{0,1},//0
         std::array<int,2>{-1,1},//45
@@ -120,6 +140,16 @@ std::array<int, 3> AIGame::getDistanceCaptors() const {
     return distanceCaptors;
 }
 
+std::string AIGame::GetMovesAsString() {
+    std::stringstream ss;
+    for(std::array<int,2> position:AIMoves) {
+        ss<<position[0]<<","<<position[1]<<";";
+    }
+    std::string movesWithoutLastComma=ss.str();
+    movesWithoutLastComma.pop_back();//remove last ";"
+    return movesWithoutLastComma;
+}
+
 void AIGame::setDirection(const int i, const int j) {
     this->direction[0]=i;
     this->direction[1]=j;
@@ -145,6 +175,9 @@ int AIGame::GetAngle() const {
 }
 void AIGame::SetAngle(int x) {
     angle=x;
+}
+Circuit* AIGame::GetCircuitRef(){
+    return circuitRef;
 }
 
 /*==============AI PLAYER==============*/
@@ -174,4 +207,26 @@ AIGame* AIPlayer::getGame(const int i) {
         return NULL;
     }
     return &games[i];
+}
+
+void AIPlayer::SaveToFile(const int generation, const bool overwriteFile) {
+    std::stringstream ss;//handle conversion from int to string
+    std::string filePath;
+    for(AIGame game : games) {
+        ss<<"../AI/"+game.GetCircuitRef()->mapName<<"-gen"<<generation<<".txt";
+        filePath=ss.str();
+        //std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
+
+        if (overwriteFile) {
+            std::ofstream file(filePath);// Create and open a text file
+            if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
+            file<<game.GetCircuitRef()->mapName<<std::endl<<games.size()<<std::endl;//if we overwrite file we need to write these
+            file.close();
+        }
+        std::ofstream file(filePath,std::ios::app);//append at the end of existing file
+        if(!file.is_open()){std::cout<<"error opening the file "<<filePath<<std::endl;}
+        file<<game.GetMovesAsString()<<std::endl;
+        file.close();
+    }
+    std::cout<<"file saved at "<<filePath<<std::endl;
 }

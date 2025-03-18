@@ -10,18 +10,30 @@
 
 #include "circuitFunctions.h"
 
-// All actions are defined here, SLOWER means the speed decreases,
-// KEEP means it stays the same, FASTER means increase
-// we can get direction choice using x%3 and get speed offet using (x//3)-1
-#define GO_LEFT_SLOWER 0
-#define GO_FORWARD_SLOWER 1
-#define GO_RIGHT_SLOWER 2
-#define GO_LEFT_KEEP 3
-#define GO_FORWARD_KEEP 4
-#define GO_RIGHT_KEEP 5
-#define GO_LEFT_FASTER 6
-#define GO_FORWARD_FASTER 7
-#define GO_RIGHT_FASTER 8
+// All actions are defined hereSLOWER means the speed decreases,
+
+//when the speed is 0 only these 8 movements are allowed
+//the next speed will be one
+#define RIGHT_FIRST_MOVE 0
+#define UP_RIGHT_FIRST_MOVE 1
+#define UP_FIRST_MOVE 2
+#define UP_LEFT_FIRST_MOVE 3
+#define LEFT_FIRST_MOVE 4
+#define DOWN_LEFT_FIRST_MOVE 5
+#define DOWN_FIRST_MOVE 6
+#define DOWN_RIGHT_FIRST_MOVE 7
+
+//SLOWER means the speed decreases, KEEP means it stays the same, FASTER means increase
+//for these moves we can get direction choice using x%3 and get speed offet using (x//3)-1
+#define GO_LEFT_SLOWER 8
+#define GO_FORWARD_SLOWER 9
+#define GO_RIGHT_SLOWER 10
+#define GO_LEFT_KEEP 11
+#define GO_FORWARD_KEEP 12
+#define GO_RIGHT_KEEP 13
+#define GO_LEFT_FASTER 14
+#define GO_FORWARD_FASTER 15
+#define GO_RIGHT_FASTER 16
 
 
 class AIPlayer;
@@ -52,18 +64,19 @@ public:
     AIGame(Circuit* circuit, AIPlayer* player) {
         this->playerRef = player;
         this->circuitRef = circuit;//je comprenais pas j'essayait de faire circuit[i][j] mais eft c'est une ref a l'OBJET Circuit qui posède circuit
+        AIMoves.push_back(circuit->start);
         position = circuit->start;
     }
 
     static std::array<int,2> AngleToDirection(int angle);
     std::array<int,3> getDistanceCaptors() const;
     bool invalidPosition(int i, int j) const;
-    // We need game related context to make a decision.
     int getDistanceToFinish();
     int takeDecision();
     int GetNextSpeedFromDecision(int decision) const;
-    std::array<int,2> GetNextDirectionFromDecision(int decision) const;//compute next direction vector u=if we choose decision x
-    void MoveAIPlayer(int decision);
+    int GetNextAngleFromDecision(int decision) const;
+    void MoveAIPlayer(int decision);//compute next player orientation when we choose decision x
+    std::string GetMovesAsString();
     //if possible put getters and setters at the end
     void setDirection(int i, int j);// Only for testing, will remove later :
     std::array<int,2> GetPosition() const;
@@ -72,6 +85,7 @@ public:
     void SetSpeed(int x);
     int GetAngle() const;
     void SetAngle(int x);
+    Circuit *GetCircuitRef();
 };
 
 class AIPlayer {
@@ -84,6 +98,7 @@ public:
     void generateBullshitPlayer();
     void addGame(Circuit* circ);
     AIGame* getGame(int i);
+    void SaveToFile(int generation,bool overwriteFile);
 
 };
 

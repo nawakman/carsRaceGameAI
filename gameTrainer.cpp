@@ -3,3 +3,18 @@
 */
 
 #include "gameTrainer.h"
+#include <fstream>
+
+void gameTrainer::SortIndividualsByScore(){
+  //WIP
+  }
+
+void gameTrainer::SaveGenerationToFile(){
+    //SortIndividualsByScore();//UNCOMMENT WHEN METHOD IS WRITTEN
+    thisGeneration[0].SaveToFile(generationIndex,true);//overwrite the last file
+    for (int i=1;i<thisGeneration.size();i++) {
+        thisGeneration[i].SaveToFile(generationIndex,false);
+    }
+  }
+
+

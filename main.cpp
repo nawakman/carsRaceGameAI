@@ -5,7 +5,7 @@
 #include <string.h>
 #include <iostream>
 
-#include "AIPlayer.h"
+#include "AIBehaviour.h"
 
 int main(int argc, char const *argv[])
 {
@@ -49,14 +49,16 @@ int main(int argc, char const *argv[])
 	Circuit test1 = Circuit("../circuits/test1Points.txt");
 	AIPlayer ai;
 	ai.addGame(&test1);
-	int moves[6]={6,6,7,7,7,7};
-	for (int i = 0; i <6 ; i++) {
+	int moves[7]={2,15,15,15,15,15,15};
+	for (int i = 0; i <7 ; i++) {
 		std::array<int,2> tmp=ai.getGame(0)->GetPosition();
 		std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<" nextDecision: "<<moves[i]<<std::endl;
 		ai.getGame(0)->MoveAIPlayer(moves[i]);
 	}
 	std::array<int,2> tmp=ai.getGame(0)->GetPosition();
 	std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<std::endl;
+
+	ai.SaveToFile(0,true);
 
 	return 0;
 }
