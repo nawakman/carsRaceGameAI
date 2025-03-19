@@ -106,9 +106,9 @@ class carsRace:
                 if event.type == pygame.QUIT:
                     quit()
             #GAMEPLAY
-            pygame.time.delay(100)#display a new move each x milliseconds
+            pygame.time.delay(50)#display a new move each x milliseconds
             self.currentTurn+=1
-            print(self.currentTurn)
+            #print(self.currentTurn)
             #RENDER
             self.Render()
 

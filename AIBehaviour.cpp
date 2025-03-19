@@ -17,6 +17,7 @@
 void AIGame::MoveAIPlayer(const int decision){
     std::array<int,2> scannedTile=position;//cpp std::array makes deep copy on assignment
     const int newAngle=GetNextAngleFromDecision(decision);
+    std::cout<<"Angle: "<<angle<<" /New angle: "<<newAngle<<std::endl;
     const std::array<int,2> newDirection=AngleToDirection(newAngle);
     int newSpeed=GetNextSpeedFromDecision(decision);
     for(int i=0;i<newSpeed;i++) {
@@ -48,14 +49,14 @@ int AIGame::GetNextSpeedFromDecision(const int decision) const{
     }
     const int minSpeed=std::max(1,speed-1);//at no point your next speed should be 0
     const int speedOffset=(decision/3)-4;
-    if((speedOffset==-1 && (speed==0 || speed==1)) || (speedOffset==1 && speed==NB_SPEEDS)){
+    if((speedOffset==-1 && (speed==0 || speed==1)) || (speedOffset==1 && speed==MAX_SPEED)){
         std::cout<<"ILLEGAL MOVE, AI tried to go slower than (1 or 0) or faster than NB_SPEEDS"<<std::endl;
     }
-    return std::clamp(speed+speedOffset,minSpeed,NB_SPEEDS);//limit speed
+    return std::clamp(speed+speedOffset,minSpeed,MAX_SPEED);//limit speed
 }
 
 int AIGame::GetNextAngleFromDecision(const int decision) const{
-    if(decision<8) {//decision 0-7 means the player is stopped and can choose any direction
+    if(decision<8) {//decision 0-7 means the player is stopped and can choose any directionç
         if(speed>0) {
             std::cout<<"ILLEGAL MOVE, AI is not stopped but tries to force a new direction"<<std::endl;
         }
@@ -64,8 +65,15 @@ int AIGame::GetNextAngleFromDecision(const int decision) const{
     if(speed==0) {
         std::cout<<"ILLEGAL MOVE, AI is stopped but tries to steer left or right"<<std::endl;
     }
-    const int angleOffset=45*(decision%3);//decision 8-15 are when player is already moving
+    const int angleOffset=45*(((decision+1)%3)-1);//decision 8-15 are when player is already moving
     return angle+angleOffset;
+}
+
+void AIGame::PlayMoveFromGrid() {
+    const std::array<int, 3> distances=getDistanceCaptors();
+    const int decision=playerRef->getRandomAllowedMove(distances[0],distances[1],distances[2],angle/ANGLES_RESOLUTION,speed);
+    std::cout<<"decision: "<<decision<<std::endl;
+    MoveAIPlayer(decision);
 }
 
 // Returns true if position is invalid
@@ -181,15 +189,26 @@ Circuit* AIGame::GetCircuitRef(){
 }
 
 /*==============AI PLAYER==============*/
+int AIPlayer::getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed){//underscore to differentiate with this.speed
+    if(_speed==0) {
+        return rand()%9;//choose new direction, speed will be 1
+    }else if(_speed==1) {
+        return (rand()%6)+8+3;//remove slow down //we can only stay at the same speed or go faster
+    }else if(_speed==MAX_SPEED) {
+        return (rand()%6)+8;//remove accelerate //we can only stay at the same speed or go slower
+    }else{
+        return (rand()%9)+8;//steer left, center right, acceleration and deceleration
+    }
+}
 
 // Full random player, used for gen 1.
 void AIPlayer::generateBullshitPlayer() {
-    for (int i=0; i<DIRECTION_SENSOR_MAX_NB; i++) {
-        for (int j=0; j<DIRECTION_SENSOR_MAX_NB; j++) {
-            for (int k=0; k<DIRECTION_SENSOR_MAX_NB; k++) {
-                for (int l=0; l<ANGLES; l++) {
-                    for (int m=0; m<NB_SPEEDS; m++) {
-                        decisionGrid[i][j][k][l][m] = rand() % 9;
+    for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
+        for (int j=0; j<DIRECTION_SENSOR_RESOLUTION; j++) {//distance in the front direction
+            for (int k=0; k<DIRECTION_SENSOR_RESOLUTION; k++) {//distance in the front right direction
+                for (int l=0; l<ANGLES_RESOLUTION; l++) {
+                    for (int m=0; m<MAX_SPEED; m++) {
+                        decisionGrid[i][j][k][l][m] = getRandomAllowedMove(i,j,k,l,m);
                     }
                 }
             }

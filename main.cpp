@@ -46,14 +46,15 @@ int main(int argc, char const *argv[])
 	}*/
 
 	//TEST Move //I CANNOT DEBUG THIS WITHOUT VISUALIZING IT
+	srand(time(NULL));
 	Circuit test1 = Circuit("../circuits/test1Points.txt");
 	AIPlayer ai;
+	ai.generateBullshitPlayer();
 	ai.addGame(&test1);
-	int moves[7]={2,15,15,15,15,15,15};
-	for (int i = 0; i <7 ; i++) {
+	for (int i = 0; i <50 ; i++) {
 		std::array<int,2> tmp=ai.getGame(0)->GetPosition();
-		std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<" nextDecision: "<<moves[i]<<std::endl;
-		ai.getGame(0)->MoveAIPlayer(moves[i]);
+		std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<std::endl;
+		ai.getGame(0)->PlayMoveFromGrid();
 	}
 	std::array<int,2> tmp=ai.getGame(0)->GetPosition();
 	std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<std::endl;
