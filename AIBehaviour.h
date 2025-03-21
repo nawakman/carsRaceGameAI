@@ -24,7 +24,7 @@
 #define DOWN_RIGHT_FIRST_MOVE 7
 
 //SLOWER means the speed decreases, KEEP means it stays the same, FASTER means increase
-//for these moves we can get direction choice using ((x+1)%3)-1 and get speed offet using (x//3)-1
+//for these moves we can get direction choice using ((x+1)%3)-1 and get speed offet using ((x+1)//3)-1
 #define GO_LEFT_SLOWER 8
 #define GO_FORWARD_SLOWER 9
 #define GO_RIGHT_SLOWER 10
@@ -72,10 +72,9 @@ public:
     std::array<int,3> getDistanceCaptors() const;
     bool invalidPosition(int i, int j) const;
     int getDistanceToFinish();
-    int takeDecision();
-    int GetNextSpeedFromDecision(int decision) const;
-    int GetNextAngleFromDecision(int decision) const;
-    void MoveAIPlayer(int decision);//compute next player state when we choose decision x
+    int GetNextSpeedFromDecision(char decision) const;
+    int GetNextAngleFromDecision(char decision) const;
+    void MoveAIPlayer(char decision);//compute next player state when we choose decision x
     void PlayMoveFromGrid();
     std::string GetMovesAsString();
 
@@ -91,11 +90,13 @@ public:
 };
 
 class AIPlayer {
-    int decisionGrid[DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][ANGLES_RESOLUTION][MAX_SPEED];
+    // One octal instead of four, because we're only storing values between 0 and ~15
+    char decisionGrid[DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][ANGLES_RESOLUTION][MAX_SPEED];
     int meanScore=-1;
     std::vector<AIGame> games;
 
 public:
+    char getDecisionGrid(int i, int j, int k, int l, int m) const;
     int getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed);
     void generateBullshitPlayer();
     void addGame(Circuit* circ);

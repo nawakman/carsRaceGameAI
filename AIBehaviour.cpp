@@ -14,7 +14,7 @@
 #include <filesystem> // C++17 and later
 /*==============AI GAME==============*/
 
-void AIGame::MoveAIPlayer(const int decision){
+void AIGame::MoveAIPlayer(const char decision){
     std::array<int,2> scannedTile=position;//cpp std::array makes deep copy on assignment
     const int newAngle=GetNextAngleFromDecision(decision);
     std::cout<<"Angle: "<<angle<<" /New angle: "<<newAngle<<std::endl;
@@ -43,19 +43,19 @@ void AIGame::MoveAIPlayer(const int decision){
     AIMoves.push_back(scannedTile);
 }
 
-int AIGame::GetNextSpeedFromDecision(const int decision) const{
+int AIGame::GetNextSpeedFromDecision(const char decision) const{
     if(decision<8) {
         return 1;
     }
     const int minSpeed=std::max(1,speed-1);//at no point your next speed should be 0
-    const int speedOffset=(decision/3)-4;
+    const int speedOffset=((decision+1)/3)-4;
     if((speedOffset==-1 && (speed==0 || speed==1)) || (speedOffset==1 && speed==MAX_SPEED)){
         std::cout<<"ILLEGAL MOVE, AI tried to go slower than (1 or 0) or faster than NB_SPEEDS"<<std::endl;
     }
     return std::clamp(speed+speedOffset,minSpeed,MAX_SPEED);//limit speed
 }
 
-int AIGame::GetNextAngleFromDecision(const int decision) const{
+int AIGame::GetNextAngleFromDecision(const char decision) const{
     if(decision<8) {//decision 0-7 means the player is stopped and can choose any directionç
         if(speed>0) {
             std::cout<<"ILLEGAL MOVE, AI is not stopped but tries to force a new direction"<<std::endl;
@@ -69,10 +69,15 @@ int AIGame::GetNextAngleFromDecision(const int decision) const{
     return angle+angleOffset;
 }
 
+char AIPlayer::getDecisionGrid(int i, int j, int k, int l, int m) const {
+    return decisionGrid[i][j][k][l][m];
+}
+
+
 void AIGame::PlayMoveFromGrid() {
     const std::array<int, 3> distances=getDistanceCaptors();
-    const int decision=playerRef->getRandomAllowedMove(distances[0],distances[1],distances[2],angle/ANGLES_RESOLUTION,speed);
-    std::cout<<"decision: "<<decision<<std::endl;
+    const char decision=playerRef->getDecisionGrid(distances[0],distances[1],distances[2],angle/ANGLES_RESOLUTION,speed);
+    std::cout<<"decision: "<<(int) decision<<std::endl;
     MoveAIPlayer(decision);
 }
 
