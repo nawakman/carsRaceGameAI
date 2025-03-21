@@ -6,8 +6,11 @@
 #include <fstream>
 #include <iostream>
 
-void gameTrainer::SortIndividualsByScore(){
-  //WIP
+void gameTrainer::addTrainingCircuit(const std::string filePath) {
+    Circuit* newCircuit=new Circuit(filePath);//store Circuit outside of local variable
+    for(AIPlayer &ai:thisGeneration) {
+        ai.addGame(newCircuit);
+    }
 }
 
 int gameTrainer::printBestScore() {
@@ -33,18 +36,22 @@ int gameTrainer::printBestScore() {
 
 
 void gameTrainer::SaveGenerationToFile(){
-    //SortIndividualsByScore();//UNCOMMENT WHEN METHOD IS WRITTEN
     thisGeneration[0].savePositionsToFile(generationIndex,true);//overwrite the last file
     for (int i=1;i<thisGeneration.size();i++) {
         thisGeneration[i].savePositionsToFile(generationIndex,false);
     }
 }
 
-void gameTrainer::train(int nbGens) {
-    thisGeneration.resize(nbGens);
-    if (nbGens==0) {
+void gameTrainer::train(int nbGereration) {
+    if (nbGereration==0) {
         std::cout<<"AAALLLLLLLOOOOOOOOOOOOOOOO"<<std::endl;
         return;
+    }
+    for(int i=0;i<nbGereration;i++) {
+        for(AIPlayer &ai:thisGeneration) {
+            ai.playGames();
+            //GATHER THE BEST AND KILL THE OTHERS
+        }
     }
 }
 

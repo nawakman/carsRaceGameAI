@@ -6,6 +6,7 @@ import os.path
 import pygame
 from math import*
 from pictureToCircuit import *
+from random import randint
 
 class carsRace:
     def __init__(self,mapPictureFile,mapResolution,windowScaleFactor=1):
@@ -133,6 +134,7 @@ class carsRace:
     def LoadAI(self,AIFile):#mapName in first line #nb individuals in second line
         self.AIMoves=[]#will look like [[ai1][ai2][ai3],...] and each "aiX" will look like [[x1,y1],[x2,y2],[x3,y3],...]
         self.segmentThatCrash=[]#list of dict of position:position
+        self.AIColors=[]
 
         filePath="AI/"+AIFile
         if not os.path.isfile(filePath):#if map text files does not already exists then generate
@@ -175,6 +177,7 @@ class carsRace:
                         individualSegmentThatCrash[fromCoord]=toCoord
 
                 self.segmentThatCrash.append(individualSegmentThatCrash)#one dictionnary per player
+                self.AIColors.append((randint(0,255),randint(0,255),randint(0,255)))#a random color for each ai
         
     def ReadTileMapFromFile(self,filePath):
         with open(filePath) as file:
@@ -227,7 +230,7 @@ class carsRace:
                 for i in range(len(self.AIMoves)):
                     ai=self.AIMoves[i]
                     limitIfNoMoveLeft=min(self.currentTurn,len(ai))
-                    self.DrawMoves(ai[:limitIfNoMoveLeft],(100,100,0))#if an ai finished faster it will have less moves #only draw up to current turn
+                    self.DrawMoves(ai[:limitIfNoMoveLeft],self.AIColors[i])#if an ai finished faster it will have less moves #only draw up to current turn
                     thisMove=ai[min(self.currentTurn,len(ai)-1)]#retrieve 1 because we slices end coord are +1 but index is not
                     self.CheckIfAICrashed(thisMove,i)
 
@@ -472,7 +475,7 @@ def minAngleDistance(fromAngle,toAngle):
 def From360To180Range(angle):#from 0,360 to -180,180
     return angle if angle<=180 else angle-360
 
-game=carsRace("test1.png",10,0.75)
+game=carsRace("test2.png",10,0.75)
 #game.Play("alone")
 #game.Play("vsAI","../AI/test1-gen0.txt")
-game.Play("AI","../AI/test1-gen0.txt")
+game.Play("AI","../AI/test2-gen0.txt")

@@ -7,25 +7,22 @@
 
 #include "AIBehaviour.h"
 
-constexpr int nbPlayersEachGen=10000;
-
 class gameTrainer {
     std::vector<AIPlayer> thisGeneration;
+    int nbAIPerGeneration;
     int generationIndex=0;//which generation is this one
 public:
-    gameTrainer() {
-        Circuit test1 = Circuit("../circuits/test1Points.txt");
-        for (int i=0; i<nbPlayersEachGen; i++) {
+    gameTrainer(const int _nbAIPerGeneration) {
+        nbAIPerGeneration=_nbAIPerGeneration;
+        for (int i=0; i<nbAIPerGeneration; i++) {
             AIPlayer ai = AIPlayer();
             ai.generateBullshitPlayer();
-            ai.addGame(&test1);
-            ai.playGames();
             thisGeneration.push_back(ai);
         }
     };
-    void train(int nbGens);
+    void addTrainingCircuit(const std::string filePath);
+    void train(int nbGeneration);
     int printBestScore();
-    void SortIndividualsByScore();
     void SaveGenerationToFile();
 };
 

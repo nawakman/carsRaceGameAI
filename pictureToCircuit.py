@@ -3,8 +3,9 @@ from PIL import Image
 class pictureToCircuit:
     def __init__(self,fileName,tileSize):#tilesize is how many pixel per tile #e.g. 512*512px picture with tilesize 16 will result in 32*32 tiles map
         self.fileName=fileName
-        self.picture=Image.open(fileName,"r")
+        self.picture=Image.open(fileName,"r").convert("RGBA")
         width,height=self.picture.size
+        self.picture=self.picture.load()#so we can access pixel colors using self.picture[x,y]
         self.tileSize=tileSize
         self.nbScanX=width//tileSize#it is better if image size is a multiple of tilesize
         self.nbScanY=height//tileSize
@@ -25,7 +26,7 @@ class pictureToCircuit:
         self.redPoints=[]
         for y in range(self.nbScanY):
             for x in range(self.nbScanX):
-                pixelColor=self.picture.getpixel((x*self.tileSize,y*self.tileSize))#image origin in top left corner
+                pixelColor=self.picture[x*self.tileSize,y*self.tileSize]#image origin in top left corner
                 if pixelColor[0]>0 or pixelColor[1]>0 or pixelColor[2]>0:#since the circuit picture is black and white, any channel will do
                     self.tileMatrix[x][y]=" "
 
