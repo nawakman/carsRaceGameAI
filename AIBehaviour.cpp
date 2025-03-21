@@ -17,13 +17,13 @@
 void AIGame::MoveAIPlayer(const char decision){
     std::array<int,2> scannedTile=position;//cpp std::array makes deep copy on assignment
     const int newAngle=GetNextAngleFromDecision(decision);
-    std::cout<<"Angle: "<<angle<<" /New angle: "<<newAngle<<std::endl;
+    // std::cout<<"Angle: "<<angle<<" /New angle: "<<newAngle<<std::endl;
     const std::array<int,2> newDirection=AngleToDirection(newAngle);
     int newSpeed=GetNextSpeedFromDecision(decision);
     for(int i=0;i<newSpeed;i++) {
         std::array<int,2> nextTileInDirection={scannedTile[0]+newDirection[0],scannedTile[1]+newDirection[1]};
         if (circuitRef.getIJ(nextTileInDirection[0],nextTileInDirection[1])=='n'){//if next move will crash in wall then put player just before the wall
-            std::cout<<"dumbass AI crahed into a wall what a failure!!!"<<std::endl;
+            // std::cout<<"dumbass AI crahed into a wall what a failure!!!"<<std::endl;
             speed=0;
             direction={0,0};
             position=scannedTile;//if a crash is detected then the actual scannedTile is the position right before the wall
@@ -73,11 +73,14 @@ char AIPlayer::getDecisionGrid(int i, int j, int k, int l, int m) const {
     return decisionGrid[i][j][k][l][m];
 }
 
+int AIGame::getDistanceToFinish() {
+    return std::abs(( position[0] - circuitRef.end[0] ) + (  circuitRef.end[1] - position[1] ));
+}
 
 void AIGame::PlayMoveFromGrid() {
     const std::array<int, 3> distances=getDistanceCaptors();
     const char decision=playerRef->getDecisionGrid(distances[0],distances[1],distances[2],coordsToAngle(position[0],position[1],circuitRef.end[0],circuitRef.end[1]),speed);
-    std::cout<<"decision: "<<(int) decision<<std::endl;
+    // std::cout<<"decision: "<<(int) decision<<std::endl;
     MoveAIPlayer(decision);
 }
 
@@ -108,8 +111,8 @@ std::array<int, 3> AIGame::getDistanceCaptors() const {
     std::array<int, 3> distanceCaptors{0};
     int radius=1;
     int direction=0;
-
-    while (radius<=14) {
+    // radius to 14
+    while (radius<=8) {
         for (auto [x, y] : { std::pair{0,1},{-1,1},{-1,0},{-1,-1},{0,-1},{1,-1},{1,0},{1,1} }) {
             // If we haven't processed this direction already
             if (distanceCaptorsAllDirections[direction]==0) {
@@ -232,14 +235,13 @@ void AIPlayer::generateBullshitPlayer() {
 }
 
 void AIGame::playGame() {
-    std::cout<<"playing game"<<std::endl;
-    for (int i=0; i<10; i++) {
+    for (int i=0; i<20; i++) {
         PlayMoveFromGrid();
     }
 }
 
 void AIPlayer::playGames() {
-    for (auto &game:games) {
+    for (auto& game:games) {
         game.playGame();
     }
 }

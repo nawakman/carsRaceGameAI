@@ -471,4 +471,4 @@ def From360To180Range(angle):#from 0,360 to -180,180
 game=carsRace("test1.png",10,0.75)
 #game.Play("alone")
 #game.Play("vsAI","../AI/test1-gen0.txt")
-game.Play("AI","../AI/test1-gen0.txt")
+game.Play("AI","../AI/test1-gen2.txt")

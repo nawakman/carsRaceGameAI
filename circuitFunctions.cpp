@@ -26,7 +26,7 @@ void Circuit::findStart() {
     }
 }
 
-// Finds start, set to -1,-1 if not found
+// Finds start, set to -1,-1 if not found. It also marks around the end !!!
 void Circuit::findEnd() {
     bool found = false;
     for (int i=0;i<circuit.size();i++) {
@@ -43,6 +43,7 @@ void Circuit::findEnd() {
         end[0]=-1;
         end[1]=-1;
     }
+    // Radius around
 }
 
 // Renvoie C si le caractere est pas accessible
