@@ -22,7 +22,7 @@ void AIGame::MoveAIPlayer(const char decision){
     int newSpeed=GetNextSpeedFromDecision(decision);
     for(int i=0;i<newSpeed;i++) {
         std::array<int,2> nextTileInDirection={scannedTile[0]+newDirection[0],scannedTile[1]+newDirection[1]};
-        if (circuitRef->getIJ(nextTileInDirection[0],nextTileInDirection[1])=='n'){//if next move will crash in wall then put player just before the wall
+        if (circuitRef.getIJ(nextTileInDirection[0],nextTileInDirection[1])=='n'){//if next move will crash in wall then put player just before the wall
             std::cout<<"dumbass AI crahed into a wall what a failure!!!"<<std::endl;
             speed=0;
             direction={0,0};
@@ -82,7 +82,7 @@ void AIGame::PlayMoveFromGrid() {
 
 // Returns true if position is invalid
 bool AIGame::invalidPosition(const int i, const int j) const {
-    return i<0||i>circuitRef->getHeight()||j<0||j>circuitRef->getWidth();
+    return i<0||i>circuitRef.getHeight()||j<0||j>circuitRef.getWidth();
 }
 
 std::array<int,2> AIGame::AngleToDirection(const int angle) {//in degrees
@@ -119,7 +119,7 @@ std::array<int, 3> AIGame::getDistanceCaptors() const {
                 }
                 // If position is valid check if there's an 'n' on the tile
                 else {
-                    if (this->circuitRef->getIJ(position[0]+x*radius,position[1]+y*radius)=='n') {
+                    if (this->circuitRef.getIJ(position[0]+x*radius,position[1]+y*radius)=='n') {
                         distanceCaptorsAllDirections[direction]=radius;
                     }
                 }
@@ -188,7 +188,7 @@ int AIGame::GetAngle() const {
 void AIGame::SetAngle(int x) {
     angle=x;
 }
-Circuit* AIGame::GetCircuitRef(){
+const Circuit& AIGame::GetCircuitRef() const{
     return circuitRef;
 }
 
@@ -221,13 +221,13 @@ void AIPlayer::generateBullshitPlayer() {
 }
 
 void AIPlayer::addGame(Circuit* circ) {
-    this->games.push_back(AIGame(circ, this));
+    this->games.push_back(AIGame(*circ, this));
 }
 
 AIGame* AIPlayer::getGame(const int i) {
     if (i>=games.size()) {
         std::cout << "Game index out of bounds" << std::endl;
-        return NULL;
+        return nullptr;
     }
     return &games[i];
 }
@@ -236,14 +236,14 @@ void AIPlayer::SaveToFile(const int generation, const bool overwriteFile) {
     std::stringstream ss;//handle conversion from int to string
     std::string filePath;
     for(AIGame game : games) {
-        ss<<"../AI/"+game.GetCircuitRef()->mapName<<"-gen"<<generation<<".txt";
+        ss<<"../AI/"+game.GetCircuitRef().mapName<<"-gen"<<generation<<".txt";
         filePath=ss.str();
         //std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
 
         if (overwriteFile) {
             std::ofstream file(filePath);// Create and open a text file
             if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
-            file<<game.GetCircuitRef()->mapName<<std::endl<<games.size()<<std::endl;//if we overwrite file we need to write these
+            file<<game.GetCircuitRef().mapName<<std::endl<<games.size()<<std::endl;//if we overwrite file we need to write these
             file.close();
         }
         std::ofstream file(filePath,std::ios::app);//append at the end of existing file

@@ -26,6 +26,25 @@ void Circuit::findStart() {
     }
 }
 
+// Finds start, set to -1,-1 if not found
+void Circuit::findEnd() {
+    bool found = false;
+    for (int i=0;i<circuit.size();i++) {
+        for (int j=0;j<circuit[i].size();j++) {
+            if (circuit[i][j] == 'e') {
+                end[0]=i;
+                end[1]=j;
+                found = true;
+            }
+        }
+    }
+    if (!found) {
+        std::cout<<"No end, something is wrong"<<std::endl;
+        end[0]=-1;
+        end[1]=-1;
+    }
+}
+
 // Renvoie C si le caractere est pas accessible
 char Circuit::getIJ(int i, int j) const {
     return circuit[i][j];

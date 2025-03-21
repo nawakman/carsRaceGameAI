@@ -56,16 +56,16 @@ class AIGame {
     int angle=0;//stores current angle compared to trigonometric origin //same information as direction
     int speed=0;//stores current speed
     std::vector <std::array<int,2>> AIMoves;//to store every player moves on the current map //then returned to python script to visualize path
-    Circuit* circuitRef;// We need the player to have access to the grid
+    Circuit& circuitRef;// We need the player to have access to the grid
     AIPlayer* playerRef;
 
 public:
     // Constructor
-    AIGame(Circuit* circuit, AIPlayer* player) {
+    AIGame(Circuit& circuit, AIPlayer* player): circuitRef (circuit) {
         this->playerRef = player;
-        this->circuitRef = circuit;//je comprenais pas j'essayait de faire circuit[i][j] mais eft c'est une ref a l'OBJET Circuit qui posède circuit
-        AIMoves.push_back(circuit->start);
-        position = circuit->start;
+        ;//je comprenais pas j'essayait de faire circuit[i][j] mais eft c'est une ref a l'OBJET Circuit qui posède circuit
+        AIMoves.push_back(circuit.start);
+        position = circuit.start;
     }
 
     static std::array<int,2> AngleToDirection(int angle);
@@ -86,7 +86,7 @@ public:
     void SetSpeed(int x);
     int GetAngle() const;
     void SetAngle(int x);
-    Circuit *GetCircuitRef();
+    const Circuit& GetCircuitRef() const;
 };
 
 class AIPlayer {
