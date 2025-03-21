@@ -16,15 +16,18 @@ class Circuit {
     int height;
     std::vector<std::vector <char>> circuit;
     void findStart();
+    void findEnd();
     void openCircuit(const std::string& fileName);
 
 public:
     Circuit(const std::string& fileName) {
         openCircuit(fileName);
         findStart();
+        findEnd();
     }
-    std::string mapName;
+    mutable std::string mapName;
     std::array<int,2> start;
+    std::array<int,2> end;
     int getHeight() const;
     int getWidth() const;
     void affiche() const;

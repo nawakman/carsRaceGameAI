@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
-
+#include <cmath>
 #include "AIBehaviour.h"
 
 int main(int argc, char const *argv[])
@@ -46,23 +46,29 @@ int main(int argc, char const *argv[])
 	}*/
 
 	//TEST Move //I CANNOT DEBUG THIS WITHOUT VISUALIZING IT
-	srand(time(NULL));
+	srand(12);
 	Circuit test1 = Circuit("../circuits/test1Points.txt");
 	AIPlayer ai;
-	ai.loadDecisionGridFromFile("../AI/AI-gen0.bigBrain");
-	//ai.generateBullshitPlayer();
+	ai.generateBullshitPlayer();
 	ai.addGame(&test1);
-	for (int i = 0; i <5 ; i++) {
+	std::cout<<test1.end[0]<<','<<test1.end[1]<<" ; "<<test1.start[0]<<','<<test1.start[1]<<std::endl;
+	std::cout<<test1.start[0]-test1.end[0]<<" : "<<test1.end[1]-test1.start[1]<<std::endl;
+	std::cout<<(test1.start[0]-test1.end[0])/(test1.end[1]-test1.start[1])<<std::endl;
+	double arc = static_cast<double>(test1.start[0] - test1.end[0])/(test1.end[1]-test1.start[1]);
+
+	std::cout<<"Angle from start to finish :"<<std::atan(arc)<<std::endl;
+	/*
+	for (int i = 0; i <50 ; i++) {
 		std::array<int,2> tmp=ai.getGame(0)->GetPosition();
 		std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<std::endl;
 		ai.getGame(0)->PlayMoveFromGrid();
 	}
+
 	std::array<int,2> tmp=ai.getGame(0)->GetPosition();
 	std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<std::endl;
 
-	ai.savePositionsToFile(0,true);
-	//ai.saveDecisionGridToFile(0);
-
+	ai.SaveToFile(0,true);
+	*/
 	return 0;
 }
 
