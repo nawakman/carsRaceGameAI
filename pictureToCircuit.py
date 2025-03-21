@@ -105,10 +105,12 @@ class pictureToCircuit:
             print("missing end")
             quit()
         
-        startPosition=AverageVector2(self.greenPoints)#we only have one start point but we can have many finish line points
+        startPosition=AverageVector2(self.greenPoints)#we only have one start point
         self.pointMatrix[startPosition[0]][startPosition[1]]="s"
-        for endPosition in self.redPoints:
-            self.pointMatrix[endPosition[0]][endPosition[1]]="e"
+        #for endPosition in self.redPoints:#we can have many finish line points
+        #   self.pointMatrix[endPosition[0]][endPosition[1]]="e"
+        endPosition=AverageVector2(self.redPoints)#we can have only one finish line point
+        self.pointMatrix[endPosition[0]][endPosition[1]]="e"
         
 
 def PrintMatrix(matrix):#helper function accessible from everywhere

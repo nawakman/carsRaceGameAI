@@ -26,7 +26,6 @@ void AIGame::MoveAIPlayer(const char decision){
             std::cout<<"dumbass AI crahed into a wall what a failure!!!"<<std::endl;
             speed=0;
             direction={0,0};
-            angle=-1;
             position=scannedTile;//if a crash is detected then the actual scannedTile is the position right before the wall
             if(scannedTile!=AIMoves.back()) {//don't put two same position else python visualiser will crash (division by 0 I guess)
                 AIMoves.push_back(scannedTile);//if a crash is detected then the actual scannedTile is the position right before the wall
@@ -196,7 +195,7 @@ Circuit* AIGame::GetCircuitRef(){
 /*==============AI PLAYER==============*/
 int AIPlayer::getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed){//underscore to differentiate with this.speed
     if(_speed==0) {
-        return rand()%9;//choose new direction, speed will be 1
+        return rand()%8;//choose new direction, speed will be 1
     }else if(_speed==1) {
         return (rand()%6)+8+3;//remove slow down //we can only stay at the same speed or go faster
     }else if(_speed==MAX_SPEED) {
