@@ -29,6 +29,7 @@ void AIGame::MoveAIPlayer(const char decision){
             position=scannedTile;//if a crash is detected then the actual scannedTile is the position right before the wall
             if(scannedTile!=AIMoves.back()) {//don't put two same position else python visualiser will crash (division by 0 I guess)
                 AIMoves.push_back(scannedTile);//if a crash is detected then the actual scannedTile is the position right before the wall
+                segmentThatCrash.push_back(std::array<std::array<int,2>,2>{scannedTile,nextTileInDirection});
             }
             return;
         }else{//if no crash were detected, scannedTile is now at the good position
@@ -152,10 +153,20 @@ std::array<int, 3> AIGame::getDistanceCaptors() const {
     return distanceCaptors;
 }
 
-std::string AIGame::GetMovesAsString() {
+std::string AIGame::getMovesAsString() {
     std::stringstream ss;
     for(std::array<int,2> position:AIMoves) {
         ss<<position[0]<<","<<position[1]<<";";
+    }
+    std::string movesWithoutLastComma=ss.str();
+    movesWithoutLastComma.pop_back();//remove last ";"
+    return movesWithoutLastComma;
+}
+
+std::string AIGame::getSegmentThatCrashAsString() {
+    std::stringstream ss;
+    for(std::array<std::array<int,2>,2> position:segmentThatCrash) {
+        ss<<position[0][0]<<","<<position[0][1]<<","<<position[1][0]<<","<<position[1][1]<<";";
     }
     std::string movesWithoutLastComma=ss.str();
     movesWithoutLastComma.pop_back();//remove last ";"
@@ -207,7 +218,6 @@ char AIPlayer::getRandomAllowedMove(int frontLeftDistance, int frontDistance, in
 
 // Full random player, used for gen 1.
 void AIPlayer::generateBullshitPlayer() {
-    std::cout<<"cacamaxing!!!!"<<std::endl;
     for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
         for (int j=0; j<DIRECTION_SENSOR_RESOLUTION; j++) {//distance in the front direction
             for (int k=0; k<DIRECTION_SENSOR_RESOLUTION; k++) {//distance in the front right direction
@@ -229,7 +239,7 @@ void AIGame::playGame() {
 }
 
 void AIPlayer::playGames() {
-    for (auto game:games) {
+    for (auto &game:games) {
         game.playGame();
     }
 }
@@ -263,13 +273,14 @@ void AIPlayer::savePositionsToFile(const int generation, const bool overwriteFil
         }
         std::ofstream file(filePath,std::ios::app);//append at the end of existing file
         if(!file.is_open()){std::cout<<"error opening the file "<<filePath<<std::endl;}
-        file<<game.GetMovesAsString()<<std::endl;
+        file<<game.getMovesAsString()<<std::endl;
+        file<<game.getSegmentThatCrashAsString()<<std::endl;
         file.close();
     }
     std::cout<<"positions saved at "<<filePath<<std::endl;
 }
 
-void AIPlayer::saveDecisionGridToFile(const int generation) {
+void AIPlayer::saveDecisionGridToFile(const int generation) const {
     std::stringstream ss;//handle conversion from int to string
     ss<<"../AI/AI"<<"-gen"<<generation<<".bigBrain";
     std::string filePath=ss.str();
@@ -280,18 +291,9 @@ void AIPlayer::saveDecisionGridToFile(const int generation) {
     std::cout<<"decisionGrid saved at "<<filePath<<std::endl;
 }
 
-void AIPlayer::loadDecisionGridFromFile(std::string filePath) {
+void AIPlayer::loadDecisionGridFromFile(const std::string& filePath) {
     std::ifstream file(filePath);// read a text file
     if(!file.is_open()){std::cout<<"error reading the file "<<filePath<<std::endl;}
     file.read(&decisionGrid[0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*sizeof(char));
     std::cout<<"decisionGrid loaded from "<<filePath<<std::endl;
 }
-
-
-/*
-* // Write the dimensions of the array first
-        outFile.write(reinterpret_cast<const char*>(dimensions.data()), dimensions.size() * sizeof(int));
-
-        // Write the array data
-        outFile.write(reinterpret_cast<const char*>(&myArray[0][0][0][0][0]), dimensions[0] * dimensions[1] * dimensions[2] * dimensions[3] * dimensions[4] * sizeof(int));
- */

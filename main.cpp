@@ -46,7 +46,7 @@ int main(int argc, char const *argv[])
 	}*/
 
 	//TEST Move //I CANNOT DEBUG THIS WITHOUT VISUALIZING IT
-	srand(12);
+	srand(time(NULL));
 	Circuit test1 = Circuit("../circuits/test1Points.txt");
 	AIPlayer ai;
 	ai.generateBullshitPlayer();

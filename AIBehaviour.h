@@ -57,6 +57,7 @@ class AIGame {
     int angle=0;//stores current angle compared to trigonometric origin //same information as direction
     int speed=0;//stores current speed
     std::vector <std::array<int,2>> AIMoves;//to store every player moves on the current map //then returned to python script to visualize path
+    std::vector <std::array<std::array<int,2>,2>> segmentThatCrash;//for python visualizer //python will replay these moves to know where the crash happened
     Circuit& circuitRef;// We need the player to have access to the grid
     AIPlayer* playerRef;
 
@@ -77,7 +78,8 @@ public:
     int GetNextAngleFromDecision(char decision) const;
     void MoveAIPlayer(char decision);//compute next player state when we choose decision x
     void PlayMoveFromGrid();
-    std::string GetMovesAsString();
+    std::string getMovesAsString();
+    std::string getSegmentThatCrashAsString();
 
     //if possible put getters and setters at the end
     void setDirection(int i, int j);// Only for testing, will remove later :
@@ -103,8 +105,8 @@ public:
     void addGame(Circuit* circ);
     AIGame* getGame(int i);
     void savePositionsToFile(int generation,bool overwriteFile);
-    void saveDecisionGridToFile(int generation);
-    void loadDecisionGridFromFile(std::string filePath);
+    void saveDecisionGridToFile(int generation) const;
+    void loadDecisionGridFromFile(const std::string& filePath);
     void playGames();
 
 };

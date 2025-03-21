@@ -130,6 +130,7 @@ class carsRace:
 
     def LoadAI(self,AIFile):#mapName in first line #nb individuals in second line
         self.AIMoves=[]#will look like [[ai1][ai2][ai3],...] and each "aiX" will look like [[x1,y1],[x2,y2],[x3,y3],...]
+        self.segmentThatCrash=[]#list of dict of position:position
 
         filePath="AI/"+AIFile
         if not os.path.isfile(filePath):#if map text files does not already exists then generate
@@ -143,6 +144,7 @@ class carsRace:
 
             nbIndividuals=int(file.readline())
             for i in range(nbIndividuals):
+                ###CORRECT AI MOVE###
                 line=file.readline()
                 individualMoves=[]#temporary container to store all moves of an individual
                 coordinates=line.split(";")
@@ -152,9 +154,22 @@ class carsRace:
                     coord[0],coord[1]=coord[1],coord[0]#in the c program coord are (line, column), in this script it is (column, line)
                     coord=pygame.math.Vector2(coord)#convert to vector2
                     individualMoves.append(coord)
+                self.AIMoves.append(individualMoves)#one list per player
 
-                self.AIMoves.append(individualMoves)
-            print(self.AIMoves)
+                ###TO DISPLAY A RED DOT WHERE AI CRASHED###
+                line=file.readline()
+                individualSegmentThatCrash={}#temporary container to store all moves of an individual
+                coordinates=line.split(";")
+
+                for strCoord in coordinates:
+                    coord=[int(x) for x in strCoord.split(",")]
+                    fromCoord=(int(coord[1]),int(coord[0]))#in c++ we choose coordinates as i,j but here we use x,y
+                    #fromCoord=pygame.math.Vector2(fromCoord)#convert to vector2 #BAD VECTOR2 CANNOT BE HASHED
+                    toCoord=(int(coord[3]),int(coord[2]))#in c++ we choose coordinates as i,j but here we use x,y
+                    #toCoord=pygame.math.Vector2(toCoord)#convert to vector2
+                    individualSegmentThatCrash[fromCoord]=toCoord
+
+                self.segmentThatCrash.append(individualSegmentThatCrash)#one dictionnary per player
         
     def ReadTileMapFromFile(self,filePath):
         with open(filePath) as file:
@@ -201,10 +216,17 @@ class carsRace:
             case "vsAI":
                 self.DrawMoves(self.playerMoves,self.playerMoveColor)
                 self.DrawNextPlayerMove()
-                self.DrawMoves(self.AIMoves[0][:self.currentTurn],(100,100,0))#AI are stored from best to worst #only display moves up to the current turn
+                limitIfNoMoveLeft=min(self.currentTurn,len(self.AIMoves[0]))
+                self.DrawMoves(self.AIMoves[0][:limitIfNoMoveLeft],(100,100,0))#AI are stored from best to worst #only display moves up to the current turn
+                thisMove=self.AIMoves[0][min(self.currentTurn,len(ai)-1)]#retrieve 1 because we slices end coord are +1 but index is not
+                self.CheckIfAICrashed(thisMove,0)
             case "AI":
-                for ai in self.AIMoves:
-                    self.DrawMoves(ai[:min(self.currentTurn,len(ai))],(100,100,0))#if an ai finished faster it will have less moves #only draw up to current turn
+                for i in range(len(self.AIMoves)):
+                    ai=self.AIMoves[i]
+                    limitIfNoMoveLeft=min(self.currentTurn,len(ai))
+                    self.DrawMoves(ai[:limitIfNoMoveLeft],(100,100,0))#if an ai finished faster it will have less moves #only draw up to current turn
+                    thisMove=ai[min(self.currentTurn,len(ai)-1)]#retrieve 1 because we slices end coord are +1 but index is not
+                    self.CheckIfAICrashed(thisMove,i)
 
         pygame.display.update()
         self.clock.tick(60)#60fps
@@ -352,6 +374,14 @@ class carsRace:
                 accessibleCount+=1 if self.pointMatrix[int(position[0])+x][int(position[1])+y]=="y" else 0
         return accessibleCount==1
 
+    def CheckIfAICrashed(self,move,ai_id):
+        move=(int(move[0]),int(move[1]))
+        if move in self.segmentThatCrash[ai_id].keys():#if this move caused a crash
+            moveEnd=self.segmentThatCrash[ai_id][move]
+            moveDirection=pygame.math.Vector2(moveEnd)-pygame.math.Vector2(move)
+            isMoveDiagonal=moveDirection.angle_to(pygame.math.Vector2(1,0))%90!=0#if moving diagonally
+            crashPosition=move+moveDirection*(0.5 if isMoveDiagonal and self.IsDiagonalTile(move+moveDirection) else 1)#if we crash in a diagonal tile we need to put the point on the diagonal wall not on the tile behind
+            self.crashLocations.add((crashPosition[0],crashPosition[1]))#the set will remove duplicates by itself #convert to tuple because Vector2 i not hashable for set
 
 def Clamp(x, minValue, maxValue):
     return max(min(x, maxValue), minValue)
