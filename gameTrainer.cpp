@@ -11,9 +11,9 @@ void gameTrainer::SortIndividualsByScore(){
 
 void gameTrainer::SaveGenerationToFile(){
     //SortIndividualsByScore();//UNCOMMENT WHEN METHOD IS WRITTEN
-    thisGeneration[0].SaveToFile(generationIndex,true);//overwrite the last file
+    thisGeneration[0].savePositionsToFile(generationIndex,true);//overwrite the last file
     for (int i=1;i<thisGeneration.size();i++) {
-        thisGeneration[i].SaveToFile(generationIndex,false);
+        thisGeneration[i].savePositionsToFile(generationIndex,false);
     }
   }
 

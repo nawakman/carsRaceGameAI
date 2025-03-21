@@ -232,7 +232,7 @@ AIGame* AIPlayer::getGame(const int i) {
     return &games[i];
 }
 
-void AIPlayer::SaveToFile(const int generation, const bool overwriteFile) {
+void AIPlayer::savePositionsToFile(const int generation, const bool overwriteFile) {
     std::stringstream ss;//handle conversion from int to string
     std::string filePath;
     for(AIGame game : games) {
@@ -251,5 +251,32 @@ void AIPlayer::SaveToFile(const int generation, const bool overwriteFile) {
         file<<game.GetMovesAsString()<<std::endl;
         file.close();
     }
-    std::cout<<"file saved at "<<filePath<<std::endl;
+    std::cout<<"positions saved at "<<filePath<<std::endl;
 }
+
+void AIPlayer::saveDecisionGridToFile(const int generation) {
+    std::stringstream ss;//handle conversion from int to string
+    ss<<"../AI/AI"<<"-gen"<<generation<<".bigBrain";
+    std::string filePath=ss.str();
+    std::ofstream file(filePath);// Create and open a text file
+    if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
+    file.write(&decisionGrid[0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*sizeof(char));
+    file.close();
+    std::cout<<"decisionGrid saved at "<<filePath<<std::endl;
+}
+
+void AIPlayer::loadDecisionGridFromFile(std::string filePath) {
+    std::ifstream file(filePath);// read a text file
+    if(!file.is_open()){std::cout<<"error reading the file "<<filePath<<std::endl;}
+    file.read(&decisionGrid[0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*sizeof(char));
+    std::cout<<"decisionGrid loaded from "<<filePath<<std::endl;
+}
+
+
+/*
+* // Write the dimensions of the array first
+        outFile.write(reinterpret_cast<const char*>(dimensions.data()), dimensions.size() * sizeof(int));
+
+        // Write the array data
+        outFile.write(reinterpret_cast<const char*>(&myArray[0][0][0][0][0]), dimensions[0] * dimensions[1] * dimensions[2] * dimensions[3] * dimensions[4] * sizeof(int));
+ */

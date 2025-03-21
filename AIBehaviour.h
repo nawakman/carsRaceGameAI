@@ -101,7 +101,9 @@ public:
     void generateBullshitPlayer();
     void addGame(Circuit* circ);
     AIGame* getGame(int i);
-    void SaveToFile(int generation,bool overwriteFile);
+    void savePositionsToFile(int generation,bool overwriteFile);
+    void saveDecisionGridToFile(int generation);
+    void loadDecisionGridFromFile(std::string filePath);
 
 };
 

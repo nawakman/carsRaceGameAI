@@ -46,12 +46,13 @@ int main(int argc, char const *argv[])
 	}*/
 
 	//TEST Move //I CANNOT DEBUG THIS WITHOUT VISUALIZING IT
-	srand(12);
+	srand(time(NULL));
 	Circuit test1 = Circuit("../circuits/test1Points.txt");
 	AIPlayer ai;
-	ai.generateBullshitPlayer();
+	ai.loadDecisionGridFromFile("../AI/AI-gen0.bigBrain");
+	//ai.generateBullshitPlayer();
 	ai.addGame(&test1);
-	for (int i = 0; i <50 ; i++) {
+	for (int i = 0; i <5 ; i++) {
 		std::array<int,2> tmp=ai.getGame(0)->GetPosition();
 		std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<std::endl;
 		ai.getGame(0)->PlayMoveFromGrid();
@@ -59,7 +60,8 @@ int main(int argc, char const *argv[])
 	std::array<int,2> tmp=ai.getGame(0)->GetPosition();
 	std::cout<<"position: "<<tmp[0]<<","<<tmp[1]<<std::endl;
 
-	ai.SaveToFile(0,true);
+	ai.savePositionsToFile(0,true);
+	//ai.saveDecisionGridToFile(0);
 
 	return 0;
 }
