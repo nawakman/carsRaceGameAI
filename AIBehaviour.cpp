@@ -75,7 +75,7 @@ char AIPlayer::getDecisionGrid(int i, int j, int k, int l, int m) const {
 
 void AIGame::PlayMoveFromGrid() {
     const std::array<int, 3> distances=getDistanceCaptors();
-    const char decision=playerRef->getDecisionGrid(distances[0],distances[1],distances[2],angle/ANGLES_RESOLUTION,speed);
+    const char decision=playerRef->getDecisionGrid(distances[0],distances[1],distances[2],coordsToAngle(position[0],position[1],circuitRef.end[0],circuitRef.end[1]),speed);
     std::cout<<"decision: "<<(int) decision<<std::endl;
     MoveAIPlayer(decision);
 }
@@ -193,7 +193,7 @@ const Circuit& AIGame::GetCircuitRef() const{
 }
 
 /*==============AI PLAYER==============*/
-int AIPlayer::getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed){//underscore to differentiate with this.speed
+char AIPlayer::getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed){//underscore to differentiate with this.speed
     if(_speed==0) {
         return rand()%8;//choose new direction, speed will be 1
     }else if(_speed==1) {
@@ -207,6 +207,7 @@ int AIPlayer::getRandomAllowedMove(int frontLeftDistance, int frontDistance, int
 
 // Full random player, used for gen 1.
 void AIPlayer::generateBullshitPlayer() {
+    std::cout<<"cacamaxing!!!!"<<std::endl;
     for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
         for (int j=0; j<DIRECTION_SENSOR_RESOLUTION; j++) {//distance in the front direction
             for (int k=0; k<DIRECTION_SENSOR_RESOLUTION; k++) {//distance in the front right direction
@@ -219,6 +220,20 @@ void AIPlayer::generateBullshitPlayer() {
         }
     }
 }
+
+void AIGame::playGame() {
+    std::cout<<"playing game"<<std::endl;
+    for (int i=0; i<10; i++) {
+        PlayMoveFromGrid();
+    }
+}
+
+void AIPlayer::playGames() {
+    for (auto game:games) {
+        game.playGame();
+    }
+}
+
 
 void AIPlayer::addGame(Circuit* circ) {
     this->games.push_back(AIGame(*circ, this));

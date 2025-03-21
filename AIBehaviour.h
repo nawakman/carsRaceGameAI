@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <array>
+#include <cmath>
 
 #include "circuitFunctions.h"
 
@@ -63,11 +64,11 @@ public:
     // Constructor
     AIGame(Circuit& circuit, AIPlayer* player): circuitRef (circuit) {
         this->playerRef = player;
-        ;//je comprenais pas j'essayait de faire circuit[i][j] mais eft c'est une ref a l'OBJET Circuit qui posède circuit
         AIMoves.push_back(circuit.start);
         position = circuit.start;
     }
 
+    void playGame();
     static std::array<int,2> AngleToDirection(int angle);
     std::array<int,3> getDistanceCaptors() const;
     bool invalidPosition(int i, int j) const;
@@ -97,18 +98,24 @@ class AIPlayer {
 
 public:
     char getDecisionGrid(int i, int j, int k, int l, int m) const;
-    int getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed);
+    char getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed);
     void generateBullshitPlayer();
     void addGame(Circuit* circ);
     AIGame* getGame(int i);
     void savePositionsToFile(int generation,bool overwriteFile);
     void saveDecisionGridToFile(int generation);
     void loadDecisionGridFromFile(std::string filePath);
+    void playGames();
 
 };
 
 inline int PositiveModulo(const int x, const int mod) {//https://stackoverflow.com/questions/14997165/fastest-way-to-get-a-positive-modulo-in-c-c
     return (x % mod + mod) % mod;//the C++ modulo doesn't have the same behaviour as the python one, it can return a negative value
+}
+
+
+inline int coordsToAngle(int i1, int j1, int i2, int j2) {
+    return PositiveModulo(static_cast<int>(std::round(std::atan2(i1-i2,j2-j1)/(M_PI/4))),8);
 }
 
 #endif

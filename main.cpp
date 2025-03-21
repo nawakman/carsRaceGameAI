@@ -56,7 +56,10 @@ int main(int argc, char const *argv[])
 	std::cout<<(test1.start[0]-test1.end[0])/(test1.end[1]-test1.start[1])<<std::endl;
 	double arc = static_cast<double>(test1.start[0] - test1.end[0])/(test1.end[1]-test1.start[1]);
 
-	std::cout<<"Angle from start to finish :"<<std::atan(arc)<<std::endl;
+	double angle = std::atan2(double(test1.start[0]-test1.end[0]),double(test1.end[1]-test1.start[1]));
+	std::cout<<"Angle from start to finish :"<<coordsToAngle(0,50,test1.end[0],test1.end[1])<<std::endl;
+	ai.playGames();
+	ai.savePositionsToFile(0,true);
 	/*
 	for (int i = 0; i <50 ; i++) {
 		std::array<int,2> tmp=ai.getGame(0)->GetPosition();
