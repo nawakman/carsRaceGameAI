@@ -158,6 +158,7 @@ std::array<int, 3> AIGame::getDistanceCaptors() const {
 
 std::string AIGame::getMovesAsString() {
     std::stringstream ss;
+    if(AIMoves.empty()){return"";}
     for(std::array<int,2> position:AIMoves) {
         ss<<position[0]<<","<<position[1]<<";";
     }
@@ -168,6 +169,7 @@ std::string AIGame::getMovesAsString() {
 
 std::string AIGame::getSegmentThatCrashAsString() {
     std::stringstream ss;
+    if(segmentThatCrash.empty()){return"";}
     for(std::array<std::array<int,2>,2> position:segmentThatCrash) {
         ss<<position[0][0]<<","<<position[0][1]<<","<<position[1][0]<<","<<position[1][1]<<";";
     }
@@ -270,7 +272,7 @@ void AIPlayer::savePositionsToFile(const int generation, const bool overwriteFil
         if (overwriteFile) {
             std::ofstream file(filePath);// Create and open a text file
             if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
-            file<<game.GetCircuitRef().mapName<<std::endl<<games.size()<<std::endl;//if we overwrite file we need to write these
+            file<<game.GetCircuitRef().mapName<<std::endl;//if we overwrite file we need to write this
             file.close();
         }
         std::ofstream file(filePath,std::ios::app);//append at the end of existing file

@@ -90,6 +90,8 @@ class carsRace:
                     self.playerTurn=False
             else:
                 if len(self.AIMoves[0])>self.currentTurn:#if AI still have moves
+                    thisMove=self.AIMoves[0][min(self.currentTurn,len(self.AIMoves[0])-1)]#retrieve 1 because we slices end coord are +1 but index is not
+                    self.CheckIfAICrashed(thisMove,0)
                     if self.IsFinishLine(self.AIMoves[0][self.currentTurn]):
                         print("AI won")
                 else:
@@ -142,10 +144,11 @@ class carsRace:
                 print("This AI was trained on: "+mapNameFromFile+" but you loaded: "+self.mapName)
                 quit()
 
-            nbIndividuals=int(file.readline())
-            for i in range(nbIndividuals):
+            while True:#we will return when end of file
                 ###CORRECT AI MOVE###
                 line=file.readline()
+                if len(line)==0:#finished file
+                    return
                 individualMoves=[]#temporary container to store all moves of an individual
                 coordinates=line.split(";")
 
@@ -159,15 +162,17 @@ class carsRace:
                 ###TO DISPLAY A RED DOT WHERE AI CRASHED###
                 line=file.readline()
                 individualSegmentThatCrash={}#temporary container to store all moves of an individual
-                coordinates=line.split(";")
-
-                for strCoord in coordinates:
-                    coord=[int(x) for x in strCoord.split(",")]
-                    fromCoord=(int(coord[1]),int(coord[0]))#in c++ we choose coordinates as i,j but here we use x,y
-                    #fromCoord=pygame.math.Vector2(fromCoord)#convert to vector2 #BAD VECTOR2 CANNOT BE HASHED
-                    toCoord=(int(coord[3]),int(coord[2]))#in c++ we choose coordinates as i,j but here we use x,y
-                    #toCoord=pygame.math.Vector2(toCoord)#convert to vector2
-                    individualSegmentThatCrash[fromCoord]=toCoord
+                if len(line)==0:#finished file
+                    return
+                if line!="\n":#if line is empty there is nothing to store but we still want to append an empty dictionnary so we don't skip loop
+                    coordinates=line.split(";")
+                    for strCoord in coordinates:
+                        coord=[int(x) for x in strCoord.split(",")]
+                        fromCoord=(coord[1],coord[0])#in c++ we choose coordinates as i,j but here we use x,y
+                        #fromCoord=pygame.math.Vector2(fromCoord)#convert to vector2 #BAD VECTOR2 CANNOT BE HASHED
+                        toCoord=(coord[3],coord[2])#in c++ we choose coordinates as i,j but here we use x,y
+                        #toCoord=pygame.math.Vector2(toCoord)#convert to vector2
+                        individualSegmentThatCrash[fromCoord]=toCoord
 
                 self.segmentThatCrash.append(individualSegmentThatCrash)#one dictionnary per player
         
@@ -218,8 +223,6 @@ class carsRace:
                 self.DrawNextPlayerMove()
                 limitIfNoMoveLeft=min(self.currentTurn,len(self.AIMoves[0]))
                 self.DrawMoves(self.AIMoves[0][:limitIfNoMoveLeft],(100,100,0))#AI are stored from best to worst #only display moves up to the current turn
-                thisMove=self.AIMoves[0][min(self.currentTurn,len(ai)-1)]#retrieve 1 because we slices end coord are +1 but index is not
-                self.CheckIfAICrashed(thisMove,0)
             case "AI":
                 for i in range(len(self.AIMoves)):
                     ai=self.AIMoves[i]
@@ -376,6 +379,7 @@ class carsRace:
 
     def CheckIfAICrashed(self,move,ai_id):
         move=(int(move[0]),int(move[1]))
+        #print("is",move,"in",self.segmentThatCrash[ai_id])
         if move in self.segmentThatCrash[ai_id].keys():#if this move caused a crash
             moveEnd=self.segmentThatCrash[ai_id][move]
             moveDirection=pygame.math.Vector2(moveEnd)-pygame.math.Vector2(move)
@@ -471,4 +475,4 @@ def From360To180Range(angle):#from 0,360 to -180,180
 game=carsRace("test1.png",10,0.75)
 #game.Play("alone")
 #game.Play("vsAI","../AI/test1-gen0.txt")
-game.Play("AI","../AI/test1-gen2.txt")
+game.Play("AI","../AI/test1-gen0.txt")

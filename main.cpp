@@ -12,7 +12,8 @@ int main(int argc, char const *argv[])
 {
 	srand(time(NULL));
 	gameTrainer game_trainer;
-	game_trainer.printBestScore();
+	//game_trainer.printBestScore();
+	game_trainer.SaveGenerationToFile();
 	return 0;
 }
 

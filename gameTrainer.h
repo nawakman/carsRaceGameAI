@@ -7,7 +7,7 @@
 
 #include "AIBehaviour.h"
 
-constexpr int nbPlayersEachGen=1000;
+constexpr int nbPlayersEachGen=10000;
 
 class gameTrainer {
     std::vector<AIPlayer> thisGeneration;
