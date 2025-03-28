@@ -265,9 +265,9 @@ void AIPlayer::savePositionsToFile(const int generation, const bool overwriteFil
     std::stringstream ss;//handle conversion from int to string
     std::string filePath;
     for(AIGame game : games) {
-        ss<<"../AI/"+game.GetCircuitRef().mapName<<"-gen"<<generation<<".txt";
+        ss<<"AI/"+game.GetCircuitRef().mapName<<"-gen"<<generation<<".txt";
         filePath=ss.str();
-        //std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
+        //std::cout<<"cpp working directory: "<<std::filesystem::current_path().string()<<std::endl;
 
         if (overwriteFile) {
             std::ofstream file(filePath);// Create and open a text file
@@ -286,10 +286,10 @@ void AIPlayer::savePositionsToFile(const int generation, const bool overwriteFil
 
 void AIPlayer::saveDecisionGridToFile(const int generation) const {
     std::stringstream ss;//handle conversion from int to string
-    ss<<"../AI/AI"<<"-gen"<<generation<<".bigBrain";
+    ss<<"../AI/brains/AI"<<"-gen"<<generation<<".bigBrain";
     std::string filePath=ss.str();
     std::ofstream file(filePath);// Create and open a text file
-    if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
+    if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;exit(EXIT_FAILURE);}
     file.write(&decisionGrid[0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*sizeof(char));
     file.close();
     std::cout<<"decisionGrid saved at "<<filePath<<std::endl;
@@ -297,7 +297,7 @@ void AIPlayer::saveDecisionGridToFile(const int generation) const {
 
 void AIPlayer::loadDecisionGridFromFile(const std::string& filePath) {
     std::ifstream file(filePath);// read a text file
-    if(!file.is_open()){std::cout<<"error reading the file "<<filePath<<std::endl;}
+    if(!file.is_open()){std::cout<<"error reading the file "<<filePath<<std::endl;exit(EXIT_FAILURE);}
     file.read(&decisionGrid[0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*sizeof(char));
     std::cout<<"decisionGrid loaded from "<<filePath<<std::endl;
 }

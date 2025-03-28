@@ -7,6 +7,7 @@ import pygame
 from math import*
 from pictureToCircuit import *
 from random import randint
+import os
 
 class carsRace:
     def __init__(self,mapPictureFile,mapResolution,windowScaleFactor=1):
@@ -38,18 +39,23 @@ class carsRace:
         self.LoadMap(mapPictureFile,mapResolution)#this function will set self.windowResolution used by next function
         self.screen=pygame.display.set_mode(self.windowResolution)
    
-    def Play(self,mode="alone",AIFile=""):#3 modes, "alone"/"vsAI"/"AI"
+    def Play(self,mode="alone",AIBrainFilePath=""):#3 modes, "alone"/"vsAI"/"loadAI"/"training"
         self.mode=mode
+        self.generationMovesEnded=False
         self.currentTurn=1#first turn is 1 not 0
         match mode:
-            case "alone":
+            case "alone":#play alone
                 self.PlayAlone()
-            case "vsAI":
-                self.LoadAI(AIFile)
+            case "vsAI":#play against given AI
+                self.GenerateMovesFromAIFile(AIBrainFilePath)
                 self.PlayAgainstAI()
-            case "AI":
-                self.LoadAI(AIFile)
+            case "specificAI":#visualize given AI
+                self.GenerateMovesFromAIFile(AIBrainFilePath)
                 self.VisualizeGeneration()
+            case "training":#viualize training on current map
+                self.generationCounter=0
+                self.LoadAI(f"AI/{self.mapName}-gen{self.generationCounter}.txt")#load first AI moves of the training on this map
+                self.VisualizeGeneration(True)
 
     def PlayAlone(self):
         while True:
@@ -90,7 +96,7 @@ class carsRace:
                     pygame.time.delay(150)
                     self.playerTurn=False
             else:
-                if len(self.AIMoves[0])>self.currentTurn:#if AI still have moves
+                if not self.NoMoreAIMove(self.AIMoves[0]):#if AI still have moves
                     thisMove=self.AIMoves[0][min(self.currentTurn,len(self.AIMoves[0])-1)]#retrieve 1 because we slices end coord are +1 but index is not
                     self.CheckIfAICrashed(thisMove,0)
                     if self.IsFinishLine(self.AIMoves[0][self.currentTurn]):
@@ -102,13 +108,22 @@ class carsRace:
             #RENDER
             self.Render()
 
-    def VisualizeGeneration(self):#it only display AI Moves, they can be wrong if the data in the file is wrong 
+    def VisualizeGeneration(self,autoLoadNextGeneration=False):#it only display AI Moves, they can be wrong if the data in the file is wrong 
         while True:
             #EVENTS
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     quit()
             #GAMEPLAY
+            if autoLoadNextGeneration and self.generationMovesEnded:
+                if os.path.isfile(f"AI/{self.mapName}-gen{self.generationCounter+1}.txt"):#if next generation file exist
+                    print("next generation loaded")
+                    self.generationCounter+=1
+                    self.LoadAI(f"AI/{self.mapName}-gen{self.generationCounter}.txt")#load next generation
+                    self.currentTurn=0#reset turn
+                else:
+                    print(f"cannot load next generation: AI/{self.mapName}-gen{self.generationCounter+1}.txt does not exist")
+
             pygame.time.delay(50)#display a new move each x milliseconds
             self.currentTurn+=1
             #print(self.currentTurn)
@@ -131,16 +146,21 @@ class carsRace:
             self.ReadTileMapFromFile(tileFilePath)#refresh map since it has been regenerated
             self.ReadPointsFromFile(pointsFilePath)
 
-    def LoadAI(self,AIFile):#mapName in first line #nb individuals in second line
+    def GenerateMovesFromAIFile(self,AIBrainFilePath):
+        print("#####C++ CONSOLE#####")
+        os.system(f"{os.getcwd()}/cmake-build-debug/generateAIMoves {AIBrainFilePath} circuits/{self.mapName}Points.txt")#tell the c++ script to simulate and save <given AI> positions on the current map
+        print("#####################")
+        self.LoadAI(f"AI/{self.mapName}-gen-1.txt")#-1 means it these positions were generated right here for a this AI and is not from training 
+
+    def LoadAI(self,AIFilePath):#mapName in first line #nb individuals in second line
         self.AIMoves=[]#will look like [[ai1][ai2][ai3],...] and each "aiX" will look like [[x1,y1],[x2,y2],[x3,y3],...]
         self.segmentThatCrash=[]#list of dict of position:position
         self.AIColors=[]
 
-        filePath="AI/"+AIFile
-        if not os.path.isfile(filePath):#if map text files does not already exists then generate
-            print("AI file"+filePath+" does not exist")
+        if not os.path.isfile(AIFilePath):#if map text files does not already exists then generate
+            print("AI file "+AIFilePath+" does not exist")
             quit()
-        with open(filePath) as file:
+        with open(AIFilePath) as file:
             mapNameFromFile=file.readline().rstrip("\n")#first line contains the name of the map the AI was trained on
             if not self.mapName==mapNameFromFile:#maps need to match
                 print("This AI was trained on: "+mapNameFromFile+" but you loaded: "+self.mapName)
@@ -225,10 +245,16 @@ class carsRace:
                 self.DrawMoves(self.playerMoves,self.playerMoveColor)
                 self.DrawNextPlayerMove()
                 limitIfNoMoveLeft=min(self.currentTurn,len(self.AIMoves[0]))
-                self.DrawMoves(self.AIMoves[0][:limitIfNoMoveLeft],(100,100,0))#AI are stored from best to worst #only display moves up to the current turn
-            case "AI":
+                self.DrawMoves(self.AIMoves[0][:limitIfNoMoveLeft],self.AIColors[0])#only display moves up to the current turn
+            case "specificAI":
+                limitIfNoMoveLeft=min(self.currentTurn,len(self.AIMoves[0]))
+                self.DrawMoves(self.AIMoves[0][:limitIfNoMoveLeft],self.AIColors[0])#only display moves up to the current turn
+            case "training":
+                self.generationMovesEnded=True#if even a single AI move it will be set back to False
                 for i in range(len(self.AIMoves)):
                     ai=self.AIMoves[i]
+                    if not self.NoMoreAIMove(ai):#if this ai still have moves
+                        self.generationMovesEnded=False
                     limitIfNoMoveLeft=min(self.currentTurn,len(ai))
                     self.DrawMoves(ai[:limitIfNoMoveLeft],self.AIColors[i])#if an ai finished faster it will have less moves #only draw up to current turn
                     thisMove=ai[min(self.currentTurn,len(ai)-1)]#retrieve 1 because we slices end coord are +1 but index is not
@@ -369,7 +395,10 @@ class carsRace:
         self.playerSpeed=newSpeed
         self.playerDirection=newDirection
         self.playerMoves.append(scannedTile)   
-        
+
+    def NoMoreAIMove(self,movesArray):
+        return self.currentTurn>=len(movesArray)#we display a move per turn, if the current turn is above the number of turns there is no more moves
+
     def IsFinishLine(self, position):
         return self.pointMatrix[int(position[0])][int(position[1])]=="e"
         
@@ -475,7 +504,8 @@ def minAngleDistance(fromAngle,toAngle):
 def From360To180Range(angle):#from 0,360 to -180,180
     return angle if angle<=180 else angle-360
 
-game=carsRace("test2.png",10,0.75)
+game=carsRace("test1.png",10,0.75)
 #game.Play("alone")
-#game.Play("vsAI","../AI/test1-gen0.txt")
-game.Play("AI","../AI/test2-gen0.txt")
+#game.Play("vsAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
+game.Play("specificAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
+#game.Play("training")#path is relative to carsRaceGameAI
