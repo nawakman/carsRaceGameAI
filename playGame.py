@@ -154,6 +154,7 @@ class carsRace:
 
     def LoadAI(self,AIFilePath):#mapName in first line #nb individuals in second line
         self.AIMoves=[]#will look like [[ai1][ai2][ai3],...] and each "aiX" will look like [[x1,y1],[x2,y2],[x3,y3],...]
+        self.crashLocations.clear()#remove all crash locations in order to display the next generation
         self.segmentThatCrash=[]#list of dict of position:position
         self.AIColors=[]
 
