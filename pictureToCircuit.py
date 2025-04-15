@@ -112,18 +112,27 @@ class pictureToCircuit:
         #   self.pointMatrix[endPosition[0]][endPosition[1]]="e"
         endPosition=AverageVector2(self.redPoints)#we can have only one finish line point
         self.pointMatrix[endPosition[0]][endPosition[1]]="e"
-        
+
+        radius = 3
+        end = [endPosition[0],endPosition[1]]
+        for i in range(end[0]-radius,end[0]+radius+1,1):
+            for j in range(end[1]-radius,end[1]+radius+1,1):
+                if (not(self.invalidPosition(i,j)) and self.pointMatrix[i][j]!='n' and abs(i-end[0])**2+abs(j-end[1])**2 <= radius**2 ):
+                    self.pointMatrix[i][j]='e'
+
+    def invalidPosition(self,i,j):
+        return i<0 or i>=self.nbScanX or j<0 or j>=self.nbScanY
 
 def PrintMatrix(matrix):#helper function accessible from everywhere
-        width=len(matrix)
-        height=len(matrix[0])
-        print("_"*(width+2))
-        for y in range(height):
-            line="|"
-            for x in range(width):
-                line+=matrix[x][y]
-            print(line+"|")
-        print("‾"*(width+2))
+    width=len(matrix)
+    height=len(matrix[0])
+    print("_"*(width+2))
+    for y in range(height):
+        line="|"
+        for x in range(width):
+            line+=matrix[x][y]
+        print(line+"|")
+    print("‾"*(width+2))
 
 def AverageVector2(vector2Array):
     average=[0,0]

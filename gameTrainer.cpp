@@ -5,6 +5,7 @@
 #include "gameTrainer.h"
 #include <fstream>
 #include <iostream>
+#include <random>
 
 void gameTrainer::addTrainingCircuit(const std::string filePath) {
     Circuit* newCircuit=new Circuit(filePath);//store Circuit outside of local variable
@@ -19,18 +20,16 @@ int gameTrainer::printBestScore() {
         std::cerr << "Error: thisGeneration is empty or game pointer is null." << std::endl;
         return -1;
     }
-    int min=thisGeneration[0].getGame(0)->getDistanceToFinish();
+    int min=thisGeneration[0].meanScore;
     for (auto& aiplayer : thisGeneration) {
-        auto* game=aiplayer.getGame(0);
-        // std::cout<<"Distance to finish : "<<game->getDistanceToFinish()<<std::endl;
-        if (game->getDistanceToFinish()<min) {
-            min = game->getDistanceToFinish();
+        if (aiplayer.meanScore<min) {
+            min = aiplayer.meanScore;
             best=index;
         }
         index++;
     }
     std::cout<<"MASTERCLASSSS TROP FORRRT : "<<min<<" index : "<<best<<std::endl;
-    thisGeneration[best].savePositionsToFile(2,true);
+    thisGeneration[best].savePositionsToFile(1,true);
     return min;
 }
 
@@ -48,10 +47,45 @@ void gameTrainer::train(int nbGereration) {
         return;
     }
     for(int i=0;i<nbGereration;i++) {
+        std::vector<AIPlayer> newGeneration;
         for(AIPlayer &ai:thisGeneration) {
             ai.playGames();
-            //GATHER THE BEST AND KILL THE OTHERS
         }
+        /*
+        for(int i=0;i<thisGeneration.size();i++) {
+            int i1=rand()%thisGeneration.size();
+            int i2=rand()%thisGeneration.size();
+            AIPlayer &ai1=thisGeneration[i1];
+            AIPlayer &ai2=thisGeneration[i2];
+            AIPlayer bestPlayer;
+            AIPlayer worstPlayer;
+            if (ai1.meanScore<ai2.meanScore) {
+                bestPlayer=ai1;
+                worstPlayer=ai2;
+            }
+            else {
+                bestPlayer=ai2;
+                worstPlayer=ai1;
+            }
+            newGeneration.push_back(bestPlayer);
+        }
+
+        for (int i=0;i<newGeneration.size();i++) {
+            // All this shit to generate a random number between 0 and 1
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<double> dist(0.0, 1.0);
+
+            int ai1 = rand() % newGeneration.size();
+            int ai2 = rand() % newGeneration.size();
+            // Possibly crossover
+
+            if (dist(gen)<0.6) {
+                newGeneration[ai1].crossover(newGeneration[ai2]);
+            }// Possibly mutate
+        }
+        thisGeneration=newGeneration;
+    }
+    */
     }
 }
-

@@ -36,18 +36,18 @@
 #define GO_FORWARD_FASTER 15
 #define GO_RIGHT_FASTER 16
 
-
 class AIPlayer;
 
 constexpr int DIRECTION_SENSOR_RESOLUTION=9;
 constexpr int ANGLES_RESOLUTION=8;
 constexpr int MAX_SPEED=10;
 constexpr int NB_MAPS=1;
+constexpr int DISTANCE_TO_FINISH_RESOLUTION=7;
 
 /* Represents the AI playing the game
  * Its decisionGrid is shaped as follows :
- * decisionGrid[LEFT_SENSOR][FRONT_SENSOR][RIGHT_SENSOR][ANGLE][SPEED] = ASSOCIATED_DECISION
- * for instance, decisionGrid[3][4][1][0][8] = 2
+ * decisionGrid[LEFT_SENSOR][FRONT_SENSOR][RIGHT_SENSOR][ANGLE][SPEED][DISTANCE_TO_FINISH_RESOLUTION] = ASSOCIATED_DECISION
+ * for instance, decisionGrid[3][4][1][0][8][3] = 2
  * which means that for these values of sensors, we choose action 2 (see actions above)
 */
 
@@ -94,12 +94,13 @@ public:
 
 class AIPlayer {
     // One octal instead of four, because we're only storing values between 0 and ~15
-    char decisionGrid[DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][ANGLES_RESOLUTION][MAX_SPEED];
-    int meanScore=-1;
+    char decisionGrid[DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][ANGLES_RESOLUTION][MAX_SPEED][DISTANCE_TO_FINISH_RESOLUTION];
     std::vector<AIGame> games;
 
 public:
-    char getDecisionGrid(int i, int j, int k, int l, int m) const;
+    int meanScore=-1;
+    void crossover(AIPlayer& other);
+    char getDecisionGrid(int i, int j, int k, int l, int m, int n) const;
     char getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed);
     void generateBullshitPlayer();
     void addGame(Circuit* circ);

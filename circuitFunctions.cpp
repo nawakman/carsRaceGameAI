@@ -5,6 +5,7 @@
 #include "circuitFunctions.h"
 
 #include <iostream>
+#include <tgmath.h>
 #include <vector>
 
 // Finds start, set to -1,-1 if not found
@@ -42,6 +43,7 @@ void Circuit::findEnd() {
         std::cout<<"No end, something is wrong"<<std::endl;
         end[0]=-1;
         end[1]=-1;
+        return;
     }
     // Radius around
 }
@@ -92,4 +94,7 @@ int Circuit::getWidth() const {
 
 int Circuit::getHeight() const {
     return height;
+}
+bool Circuit::invalidPosition(const int i, const int j) const {
+    return i<0||i>getHeight()||j<0||j>getWidth();
 }

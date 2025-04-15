@@ -18,7 +18,7 @@ class Circuit {
     void findStart();
     void findEnd();
     void openCircuit(const std::string& fileName);
-
+    bool invalidPosition(int i, int j) const;
 public:
     Circuit(const std::string& fileName) {
         openCircuit(fileName);

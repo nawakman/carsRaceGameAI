@@ -69,17 +69,18 @@ int AIGame::GetNextAngleFromDecision(const char decision) const{
     return angle+angleOffset;
 }
 
-char AIPlayer::getDecisionGrid(int i, int j, int k, int l, int m) const {
-    return decisionGrid[i][j][k][l][m];
+char AIPlayer::getDecisionGrid(int i, int j, int k, int l, int m, int n) const {
+    return decisionGrid[i][j][k][l][m][n];
 }
 
 int AIGame::getDistanceToFinish() {
-    return std::abs(( position[0] - circuitRef.end[0] ) + (  circuitRef.end[1] - position[1] ));
+    return std::abs((position[0]-circuitRef.end[0])) + std::abs(circuitRef.end[1] - position[1]);
 }
 
 void AIGame::PlayMoveFromGrid() {
     const std::array<int, 3> distances=getDistanceCaptors();
-    const char decision=playerRef->getDecisionGrid(distances[0],distances[1],distances[2],coordsToAngle(position[0],position[1],circuitRef.end[0],circuitRef.end[1]),speed);
+    int distToFinish = std::min(getDistanceToFinish()/2,6);
+    const char decision=playerRef->getDecisionGrid(distances[0],distances[1],distances[2],coordsToAngle(position[0],position[1],circuitRef.end[0],circuitRef.end[1]),speed,distToFinish);
     // std::cout<<"decision: "<<(int) decision<<std::endl;
     MoveAIPlayer(decision);
 }
@@ -221,6 +222,33 @@ char AIPlayer::getRandomAllowedMove(int frontLeftDistance, int frontDistance, in
     }
 }
 
+void AIPlayer::crossover(AIPlayer& player) {
+    int nbcases = DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*DISTANCE_TO_FINISH_RESOLUTION;
+    int i1 = rand() % nbcases;
+    int i2 = rand() % nbcases;
+    i1 = std::min(i1, i2);
+    i2 = std::max(i1, i2);
+
+    int count = 0;
+    for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
+        for (int j=0; j<DIRECTION_SENSOR_RESOLUTION; j++) {//distance in the front direction
+            for (int k=0; k<DIRECTION_SENSOR_RESOLUTION; k++) {//distance in the front right direction
+                for (int l=0; l<ANGLES_RESOLUTION; l++) {
+                    for (int m=0; m<MAX_SPEED; m++) {
+                        for (int n=0; n<DISTANCE_TO_FINISH_RESOLUTION;n++) {
+                            if (count > i1 && count < i2) {
+                                decisionGrid[i][j][k][l][m][n]=player.decisionGrid[i][j][k][l][m][n];
+                            }
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+
 // Full random player, used for gen 1.
 void AIPlayer::generateBullshitPlayer() {
     for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
@@ -228,7 +256,9 @@ void AIPlayer::generateBullshitPlayer() {
             for (int k=0; k<DIRECTION_SENSOR_RESOLUTION; k++) {//distance in the front right direction
                 for (int l=0; l<ANGLES_RESOLUTION; l++) {
                     for (int m=0; m<MAX_SPEED; m++) {
-                        decisionGrid[i][j][k][l][m] = getRandomAllowedMove(i,j,k,l,m);
+                        for (int n=0; n<DISTANCE_TO_FINISH_RESOLUTION;n++) {
+                            decisionGrid[i][j][k][l][m][n] = getRandomAllowedMove(i,j,k,l,m);
+                        }
                     }
                 }
             }
@@ -237,8 +267,17 @@ void AIPlayer::generateBullshitPlayer() {
 }
 
 void AIGame::playGame() {
-    for (int i=0; i<20; i++) {
+    int maxMoves=50;
+    int i=0;
+    for (i=0; i<maxMoves && circuitRef.getIJ(position[0],position[1])!='e'; i++) {
         PlayMoveFromGrid();
+    }
+    // printf("i : %d\ndist : %d\n",i, getDistanceToFinish()*maxMoves/(circuitRef.getHeight()+circuitRef.getWidth()));
+    if (this->playerRef->meanScore == -1) {
+        this->playerRef->meanScore = i + getDistanceToFinish()*maxMoves/(circuitRef.getHeight()+circuitRef.getWidth());
+    }
+    else {
+        this->playerRef->meanScore += i + getDistanceToFinish()*maxMoves/(circuitRef.getHeight()+circuitRef.getWidth());
     }
 }
 
@@ -290,7 +329,7 @@ void AIPlayer::saveDecisionGridToFile(const int generation) const {
     std::string filePath=ss.str();
     std::ofstream file(filePath);// Create and open a text file
     if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
-    file.write(&decisionGrid[0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*sizeof(char));
+    file.write(&decisionGrid[0][0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*sizeof(char));
     file.close();
     std::cout<<"decisionGrid saved at "<<filePath<<std::endl;
 }
@@ -298,6 +337,6 @@ void AIPlayer::saveDecisionGridToFile(const int generation) const {
 void AIPlayer::loadDecisionGridFromFile(const std::string& filePath) {
     std::ifstream file(filePath);// read a text file
     if(!file.is_open()){std::cout<<"error reading the file "<<filePath<<std::endl;}
-    file.read(&decisionGrid[0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*sizeof(char));
+    file.read(&decisionGrid[0][0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*sizeof(char));
     std::cout<<"decisionGrid loaded from "<<filePath<<std::endl;
 }
