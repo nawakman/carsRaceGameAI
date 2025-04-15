@@ -7,6 +7,7 @@
 #include <iostream>
 #include <tgmath.h>
 #include <vector>
+#include <filesystem>
 
 // Finds start, set to -1,-1 if not found
 void Circuit::findStart() {
@@ -57,8 +58,7 @@ char Circuit::getIJ(int i, int j) const {
 void Circuit::openCircuit(const std::string& fileName) {
     mapName=fileName.substr(fileName.rfind('/') + 1);//get last filename after last "/" //https://stackoverflow.com/questions/12261657/how-to-get-last-element-in-tokenized-string-in-c-separated-by
     mapName=mapName.substr(0, mapName.find("Points.txt")); //get mapName before this string //used to name saved AI files
-    std::cout<<"map "<<mapName<<" loaded"<<std::endl;
-
+    std::cout<<"cpp working directory: "<<std::filesystem::current_path().string()<<std::endl;
     std::ifstream file(fileName);
     if (!file) {
         perror("Error opening file");
@@ -76,6 +76,7 @@ void Circuit::openCircuit(const std::string& fileName) {
         circuit[i].assign(tmp.begin(),tmp.end());
     }
     file.close();
+    std::cout<<"map "<<mapName<<" loaded from "<<fileName<<std::endl;
 }
 
 void Circuit::affiche () const {
