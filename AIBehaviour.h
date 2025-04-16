@@ -98,18 +98,18 @@ class AIPlayer {
     std::vector<AIGame> games;
 
 public:
-    int meanScore=-1;
+    int meanScore=0;
     void crossover(AIPlayer& other);
     char getDecisionGrid(int i, int j, int k, int l, int m, int n) const;
-    char getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed);
+    char getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed, int distanceToFinish);
     void generateBullshitPlayer();
     void addGame(Circuit* circ);
     AIGame* getGame(int i);
-    void savePositionsToFile(int generation,bool overwriteFile);
+    void savePositionsToFile(int generation,bool overwriteFile,bool stfu=false);
     void saveDecisionGridToFile(int generation) const;
     void loadDecisionGridFromFile(const std::string& filePath);
     void playGames();
-
+    void mutate(float percentage);
 };
 
 inline int PositiveModulo(const int x, const int mod) {//https://stackoverflow.com/questions/14997165/fastest-way-to-get-a-positive-modulo-in-c-c

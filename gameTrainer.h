@@ -7,6 +7,12 @@
 
 #include "AIBehaviour.h"
 
+//gemini.google.com/app?hl=fr
+//the sum of the three following must equal 1 (so the numbers of individuals in the next generation is the same as the one in the current generation)
+constexpr float mutateBestPercentage=0.2;
+constexpr float crossoverPercentage=0.7;
+constexpr float generateNewPercentage=0.1;
+
 class gameTrainer {
     std::vector<AIPlayer> thisGeneration;
     int nbAIPerGeneration;
@@ -20,8 +26,9 @@ public:
             thisGeneration.push_back(ai);
         }
     };
-    void addTrainingCircuit(const std::string filePath);
+    void addTrainingCircuit(std::string filePath);
     void train(int nbGeneration);
+    void sortDescendingOrder();
     int printBestScore();
     void SaveGenerationToFile();
 };

@@ -11,7 +11,7 @@
 int main(int argc, char const *argv[])
 {
 	srand(time(NULL));
-	gameTrainer game_trainer=gameTrainer(1);
+	gameTrainer game_trainer=gameTrainer(50);
 	game_trainer.addTrainingCircuit("../circuits/test1Points.txt");
 	game_trainer.train(1);
 	game_trainer.printBestScore();

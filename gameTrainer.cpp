@@ -3,6 +3,7 @@
 */
 
 #include "gameTrainer.h"
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -13,31 +14,36 @@ void gameTrainer::addTrainingCircuit(const std::string filePath) {
         ai.addGame(newCircuit);
     }
 }
+void gameTrainer::sortDescendingOrder() {//the lower the better //best individual at index 0
+    qsort(thisGeneration.data(),thisGeneration.size(),sizeof(AIPlayer),[](const void* a, const void* b) {
+        const auto *playerA = (const AIPlayer *)a;
+        const auto *playerB = (const AIPlayer *)b;
 
-int gameTrainer::printBestScore() {
-    int index=0, best=0;
-    if (thisGeneration.empty() || !thisGeneration[0].getGame(0)) {
-        std::cerr << "Error: thisGeneration is empty or game pointer is null." << std::endl;
-        return -1;
-    }
-    int min=thisGeneration[0].meanScore;
-    for (auto& aiplayer : thisGeneration) {
-        if (aiplayer.meanScore<min) {
-            min = aiplayer.meanScore;
-            best=index;
+        if (playerA->meanScore < playerB->meanScore) {
+            return -1; // playerA comes before playerB
         }
-        index++;
-    }
-    std::cout<<"MASTERCLASSSS TROP FORRRT : "<<min<<" index : "<<best<<std::endl;
-    thisGeneration[best].savePositionsToFile(-1,true);//we save the best individual as a generation with -1
-    return min;
+        if (playerA->meanScore > playerB->meanScore) {
+            return 1;  // playerA comes after playerB
+        }
+        return 0;  // playerA and playerB are equal in terms of meanScore
+    });//https://koor.fr/C/cstdlib/qsort.wp
+
+    /*for(AIPlayer &ai:thisGeneration) {
+        std::cout<<ai.meanScore<<std::endl;
+    }*/
 }
 
+int gameTrainer::printBestScore() {//needs array to be sorted
+    std::cout<<"Best score(minimum): "<<thisGeneration[0].meanScore<<std::endl;
+    std::cout<<"saving best individual...\t";
+    thisGeneration[0].savePositionsToFile(-1,true,true);//we save the best individual as a generation with -1
+    return thisGeneration[0].meanScore;
+}
 
 void gameTrainer::SaveGenerationToFile(){
     thisGeneration[0].savePositionsToFile(generationIndex,true);//overwrite the last file
     for (int i=1;i<thisGeneration.size();i++) {
-        thisGeneration[i].savePositionsToFile(generationIndex,false);
+        thisGeneration[i].savePositionsToFile(generationIndex,false,true);
     }
 }
 
@@ -47,9 +53,20 @@ void gameTrainer::train(int nbGereration) {
         return;
     }
     for(int i=0;i<nbGereration;i++) {
-        std::vector<AIPlayer> newGeneration;
-        for(AIPlayer &ai:thisGeneration) {
+        //for each generation
+        std::vector<AIPlayer> newGeneration;//prepare a container for the next generation
+        for(AIPlayer &ai:thisGeneration) {//simulate and score individuals
             ai.playGames();
+        }
+        sortDescendingOrder();
+        //KEEP BEST INDIVIDUALS
+        for(int i=0;i<std::round(mutateBestPercentage*nbAIPerGeneration);i++) {
+            newGeneration.push_back(thisGeneration[i]);//copies this good individual in the next generation
+        }
+
+        //CROSSOVER ,MIX TWO INDIVIDUALS GENES
+        for(int i=0;i<std::round(crossoverPercentage*nbAIPerGeneration);i++) {
+            //make crossovers
         }
         /*
         for(int i=0;i<thisGeneration.size();i++) {
@@ -87,5 +104,17 @@ void gameTrainer::train(int nbGereration) {
         thisGeneration=newGeneration;
     }
     */
+        //GENERATE NEW (might find new strategies)
+        for(int i=0;i<std::round(generateNewPercentage*nbAIPerGeneration);i++) {
+            AIPlayer ai = AIPlayer();
+            ai.generateBullshitPlayer();
+            newGeneration.push_back(ai);
+        }
+
+        std::cout<<"new Generation scores"<<std::endl;
+        for(AIPlayer &ai:newGeneration) {
+            std::cout<<ai.meanScore<<",";
+        }
+        std::cout<<std::endl;
     }
 }
