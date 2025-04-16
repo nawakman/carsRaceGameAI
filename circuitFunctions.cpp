@@ -51,6 +51,9 @@ void Circuit::findEnd() {
 
 // Renvoie C si le caractere est pas accessible
 char Circuit::getIJ(int i, int j) const {
+    /*if(invalidPosition(i,j)) {
+        std::cout << "index out of bounds i:"<<i<<" j:"<<j<<" in Circuit::getIJ"<<std::endl;
+    }*/
     return circuit[i][j];
 }
 
@@ -97,5 +100,5 @@ int Circuit::getHeight() const {
     return height;
 }
 bool Circuit::invalidPosition(const int i, const int j) const {
-    return i<0||i>getHeight()||j<0||j>getWidth();
+    return i<0||i>=getHeight()||j<0||j>=getWidth();
 }

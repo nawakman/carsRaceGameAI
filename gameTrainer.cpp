@@ -9,10 +9,8 @@
 #include <random>
 
 void gameTrainer::addTrainingCircuit(const std::string filePath) {
-    Circuit* newCircuit=new Circuit(filePath);//store Circuit outside of local variable
-    for(AIPlayer &ai:thisGeneration) {
-        ai.addGame(newCircuit);
-    }
+    Circuit* c=new Circuit(filePath);//create new circuit outside of local scope
+    trainingCircuits.push_back(*c);//append this circuit to the list of trainingCircuits
 }
 void gameTrainer::sortDescendingOrder() {//the lower the better //best individual at index 0
     qsort(thisGeneration.data(),thisGeneration.size(),sizeof(AIPlayer),[](const void* a, const void* b) {
@@ -52,16 +50,20 @@ void gameTrainer::train(int nbGereration) {
         std::cout<<"AAALLLLLLLOOOOOOOOOOOOOOOO"<<std::endl;
         return;
     }
+    std::vector<AIPlayer> newGeneration;//prepare a container for the next generation
     for(int i=0;i<nbGereration;i++) {
         //for each generation
-        std::vector<AIPlayer> newGeneration;//prepare a container for the next generation
+        newGeneration.clear();//make sure it is empty before filling it with players
         for(AIPlayer &ai:thisGeneration) {//simulate and score individuals
+            for(Circuit &c:trainingCircuits) {//add all training circuits to the individuals of this generation
+                ai.addGame(&c);
+            }
             ai.playGames();
         }
         sortDescendingOrder();
         //KEEP BEST INDIVIDUALS
         for(int i=0;i<std::round(mutateBestPercentage*nbAIPerGeneration);i++) {
-            newGeneration.push_back(thisGeneration[i]);//copies this good individual in the next generation
+            newGeneration.push_back(AIPlayer(thisGeneration[i]));//create NEW individual that has a COPY of this individual decisionGrid, so we can discard the previous generation
         }
 
         //CROSSOVER ,MIX TWO INDIVIDUALS GENES
@@ -111,10 +113,17 @@ void gameTrainer::train(int nbGereration) {
             newGeneration.push_back(ai);
         }
 
-        std::cout<<"new Generation scores"<<std::endl;
-        for(AIPlayer &ai:newGeneration) {
+        //INFO ABOUT THIS GENERATION
+        std::cout<<"this generation scores"<<std::endl;
+        for(AIPlayer &ai:thisGeneration) {
             std::cout<<ai.meanScore<<",";
         }
         std::cout<<std::endl;
+        printBestScore();
+
+        //SAVE GENERATION FOR VISUALISATION AND GO TO NEXT GENERATION
+        SaveGenerationToFile();
+        generationIndex++;
+        thisGeneration=newGeneration;
     }
 }

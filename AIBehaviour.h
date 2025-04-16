@@ -52,7 +52,7 @@ constexpr int DISTANCE_TO_FINISH_RESOLUTION=7;
 */
 
 class AIGame {
-    std::array<int,2> position;//stores current position
+    std::array<int,2> position{};//stores current position
     std::array<int,2> direction={0,0};//stores current ABSOLUTE direction
     int angle=0;//stores current angle compared to trigonometric origin //same information as direction
     int speed=0;//stores current speed
@@ -68,11 +68,23 @@ public:
         AIMoves.push_back(circuit.start);
         position = circuit.start;
     }
-
+    AIGame& operator=(const AIGame& other) {//if not present raises an error
+        if (this == &other) {
+            return *this;
+        }
+        position = other.position;
+        direction = other.direction;
+        angle = other.angle;
+        speed = other.speed;
+        AIMoves = other.AIMoves;
+        segmentThatCrash=other.segmentThatCrash;
+        circuitRef = other.circuitRef;
+        playerRef = other.playerRef;
+        return *this;
+    }
     void playGame();
     static std::array<int,2> AngleToDirection(int angle);
     std::array<int,3> getDistanceCaptors() const;
-    bool invalidPosition(int i, int j) const;
     int getDistanceToFinish();
     int GetNextSpeedFromDecision(char decision) const;
     int GetNextAngleFromDecision(char decision) const;
@@ -94,10 +106,26 @@ public:
 
 class AIPlayer {
     // One octal instead of four, because we're only storing values between 0 and ~15
-    char decisionGrid[DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][ANGLES_RESOLUTION][MAX_SPEED][DISTANCE_TO_FINISH_RESOLUTION];
+    char decisionGrid[DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][DIRECTION_SENSOR_RESOLUTION][ANGLES_RESOLUTION][MAX_SPEED][DISTANCE_TO_FINISH_RESOLUTION]{};
     std::vector<AIGame> games;
 
 public:
+    AIPlayer()= default;//empty constructor
+    AIPlayer(const AIPlayer& other) {//deep copy of decision grid
+        for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
+            for (int j=0; j<DIRECTION_SENSOR_RESOLUTION; j++) {//distance in the front direction
+                for (int k=0; k<DIRECTION_SENSOR_RESOLUTION; k++) {//distance in the front right direction
+                    for (int l=0; l<ANGLES_RESOLUTION; l++) {
+                        for (int m=0; m<MAX_SPEED; m++) {
+                            for (int n=0; n<DISTANCE_TO_FINISH_RESOLUTION;n++) {
+                                decisionGrid[i][j][k][l][m][n] = other.decisionGrid[i][j][k][l][m][n];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     int meanScore=0;
     void crossover(AIPlayer& other);
     char getDecisionGrid(int i, int j, int k, int l, int m, int n) const;

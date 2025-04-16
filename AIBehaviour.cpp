@@ -22,6 +22,7 @@ void AIGame::MoveAIPlayer(const char decision){
     int newSpeed=GetNextSpeedFromDecision(decision);
     for(int i=0;i<newSpeed;i++) {
         std::array<int,2> nextTileInDirection={scannedTile[0]+newDirection[0],scannedTile[1]+newDirection[1]};
+        //std::cout <<"next tile in direction: "<<circuitRef.getIJ(nextTileInDirection[0],nextTileInDirection[1]) << std::endl;//DEBUG
         if (circuitRef.getIJ(nextTileInDirection[0],nextTileInDirection[1])=='n'){//if next move will crash in wall then put player just before the wall
             // std::cout<<"dumbass AI crahed into a wall what a failure!!!"<<std::endl;
             speed=0;
@@ -81,13 +82,8 @@ void AIGame::PlayMoveFromGrid() {
     const std::array<int, 3> distances=getDistanceCaptors();
     int distToFinish = std::min(getDistanceToFinish()/2,6);
     const char decision=playerRef->getDecisionGrid(distances[0],distances[1],distances[2],coordsToAngle(position[0],position[1],circuitRef.end[0],circuitRef.end[1]),speed,distToFinish);
-    // std::cout<<"decision: "<<(int) decision<<std::endl;
+    //std::cout<<"decision: "<<(int) decision<<std::endl;
     MoveAIPlayer(decision);
-}
-
-// Returns true if position is invalid
-bool AIGame::invalidPosition(const int i, const int j) const {
-    return i<0||i>circuitRef.getHeight()||j<0||j>circuitRef.getWidth();
 }
 
 std::array<int,2> AIGame::AngleToDirection(const int angle) {//in degrees
@@ -118,7 +114,7 @@ std::array<int, 3> AIGame::getDistanceCaptors() const {
             // If we haven't processed this direction already
             if (distanceCaptorsAllDirections[direction]==0) {
                 // std::cout << "Processing new direction"<<std::endl;
-                if (invalidPosition(position[0]+x*radius,position[1]+y*radius)) {
+                if (circuitRef.invalidPosition(position[0]+x*radius,position[1]+y*radius)) {//ON WHICH MAP ???
                     // std::cout << "Invalid position ! " << position[0]+y << " : " << position[1]+x << std::endl;
                     distanceCaptorsAllDirections[direction]=radius;
                 }
@@ -269,7 +265,8 @@ void AIPlayer::generateBullshitPlayer() {
 void AIGame::playGame() {
     int maxMoves=50;
     int i=0;
-    for (i=0; i<maxMoves && circuitRef.getIJ(position[0],position[1])!='e'; i++) {
+    for (i=0; i<maxMoves && circuitRef.getIJ(position[0],position[1])!='e'; i++) {//while not at the finish line //"e" for end
+        //std::cout << i <<"\ti:"<<position[0]<<" j:"<<position[1]<< std::endl;
         PlayMoveFromGrid();
     }
     // printf("i : %d\ndist : %d\n",i, getDistanceToFinish()*maxMoves/(circuitRef.getHeight()+circuitRef.getWidth()));
@@ -313,6 +310,7 @@ void AIPlayer::savePositionsToFile(const int generation, const bool overwriteFil
     std::stringstream ss;//handle conversion from int to string
     std::string filePath;
     for(AIGame game : games) {
+        ss.str("");//empty the path so we can prepare the next one
         ss<<"../AI/"+game.GetCircuitRef().mapName<<"-gen"<<generation<<".txt";
         filePath=ss.str();
         //std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;

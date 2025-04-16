@@ -15,6 +15,7 @@ constexpr float generateNewPercentage=0.1;
 
 class gameTrainer {
     std::vector<AIPlayer> thisGeneration;
+    std::vector<Circuit> trainingCircuits;
     int nbAIPerGeneration;
     int generationIndex=0;//which generation is this one
 public:
