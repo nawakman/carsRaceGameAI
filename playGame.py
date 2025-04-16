@@ -133,7 +133,7 @@ class carsRace:
     def LoadMap(self,mapPictureFile,mapResolution):
         self.mapMaker=pictureToCircuit(mapPictureFile,mapResolution)
 
-        self.mapName=mapPictureFile.split(".")[0]
+        self.mapName=mapPictureFile.split("/")[-1].split(".")[0]
         tileFilePath="circuits/"+self.mapName+".txt"
         pointsFilePath="circuits/"+self.mapName+"Points.txt"
         if not os.path.isfile(tileFilePath):#if map text files does not already exists then generate
@@ -505,7 +505,7 @@ def minAngleDistance(fromAngle,toAngle):
 def From360To180Range(angle):#from 0,360 to -180,180
     return angle if angle<=180 else angle-360
 
-game=carsRace("pictures/test1.png",10,0.75)
+game=carsRace("circuits/pictures/test1.png",10,0.75)
 #game.Play("alone")
 #game.Play("vsAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
 game.Play("specificAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI

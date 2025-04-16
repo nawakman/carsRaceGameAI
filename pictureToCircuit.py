@@ -37,7 +37,7 @@ class pictureToCircuit:
 
     def SaveTileMatrix(self):
         """this matrix will be used for displaying game only"""
-        with open("circuits/"+self.fileName.split(".")[0]+".txt", "w") as textFile:
+        with open("circuits/"+self.fileName.split("/")[-1].split(".")[0]+".txt", "w") as textFile:
             print(f"{self.nbScanX};{self.nbScanY}", file=textFile)#save matrix size in first line
             print(f"mapResolution={self.tileSize}", file=textFile)#save the tilesize used to scan to later check if we need to refresh the map to a new resolution 
             for y in range(self.nbScanY):
@@ -90,7 +90,7 @@ class pictureToCircuit:
     
     def SavePointMatrix(self):
         """this matrix will be used for computing AI behaviour and indicate start and end points"""
-        with open("circuits/"+self.fileName.split(".")[0]+"Points.txt", "w") as textFile:
+        with open("circuits/"+self.fileName.split("/")[-1].split(".")[0]+"Points.txt", "w") as textFile:
             print(f"{self.nbScanX+1};{self.nbScanY+1}", file=textFile)#save matrix size in first line
             for y in range(self.nbScanY+1):
                 line=""

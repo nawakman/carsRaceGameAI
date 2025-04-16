@@ -29,7 +29,7 @@ int gameTrainer::printBestScore() {
         index++;
     }
     std::cout<<"MASTERCLASSSS TROP FORRRT : "<<min<<" index : "<<best<<std::endl;
-    thisGeneration[best].savePositionsToFile(1,true);
+    thisGeneration[best].savePositionsToFile(-1,true);//we save the best individual as a generation with -1
     return min;
 }
 
