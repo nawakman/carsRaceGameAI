@@ -7,7 +7,7 @@
 
 #include "AIBehaviour.h"
 
-//gemini.google.com/app?hl=fr
+//https://softwareengineering.stackexchange.com/questions/338611/how-do-we-produce-the-next-generation
 //the sum of the three following must equal 1 (so the numbers of individuals in the next generation is the same as the one in the current generation)
 constexpr float mutateBestPercentage=0.2;
 constexpr float crossoverPercentage=0.7;
