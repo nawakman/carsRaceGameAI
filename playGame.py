@@ -235,7 +235,7 @@ class carsRace:
                         self.end=pygame.math.Vector2(x,y)
 
     def Render(self):
-        if self.currentTurn==1:#draw only one time per generation #takes a lot of resources to draw each frame
+        if self.currentTurn<=1 or self.mode=="alone" or self.mode=="vsAI":#draw only one time per generation #takes a lot of resources to draw each frame
             self.DrawMap()
             self.DrawPoints()
 
@@ -249,9 +249,7 @@ class carsRace:
                 self.DrawNextPlayerMove()
                 limitIfNoMoveLeft=min(self.currentTurn,len(self.AIMoves[0]))
                 self.DrawMoves(self.AIMoves[0][:limitIfNoMoveLeft],self.AIColors[0])#only display moves up to the current turn
-                ai=self.AIMoves[0]
-                thisMove=ai[min(self.currentTurn,len(ai)-1)]#retrieve 1 because we slices end coord are +1 but index is not
-                self.CheckIfAICrashed(thisMove,0)
+                #the crash check of this mode is done in PlayAgainstAI, since we already have thisMove to check if AI reached finish line
             case "specificAI":
                 limitIfNoMoveLeft=min(self.currentTurn,len(self.AIMoves[0]))
                 self.DrawMoves(self.AIMoves[0][:limitIfNoMoveLeft],self.AIColors[0])#only display moves up to the current turn
@@ -515,6 +513,6 @@ def From360To180Range(angle):#from 0,360 to -180,180
 
 game=carsRace("circuits/pictures/test1.png",10,0.75)
 #game.Play("alone")
-#game.Play("vsAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
-game.Play("specificAI","AI/brains/AI-gen99.bigBrain")#path is relative to carsRaceGameAI #adapt to the last bigbrain file
-#game.Play("training")#path is relative to carsRaceGameAI #you can start from a specific generation using fromGeneration=x argument
+#game.Play("vsAI","AI/brains/AI-gen99.bigBrain")#path is relative to carsRaceGameAI
+#game.Play("specificAI","AI/brains/AI-gen99.bigBrain")#path is relative to carsRaceGameAI #adapt to the last bigbrain file
+game.Play("training")#path is relative to carsRaceGameAI #you can start from a specific generation using fromGeneration=x argument

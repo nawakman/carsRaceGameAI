@@ -11,7 +11,6 @@
 
 int main(int argc, char const *argv[])
 {
-	//srand(4);
 	srand(time(NULL));
 	std::filesystem::remove_all("AI");//clear previous AI trainings and brains
 	std::filesystem::create_directories("AI");//recreates deleted folders
