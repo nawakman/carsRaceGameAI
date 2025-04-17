@@ -31,10 +31,11 @@ void gameTrainer::sortDescendingOrder() {//the lower the better //best individua
     }*/
 }
 
-int gameTrainer::printBestScore() {//needs array to be sorted
+int gameTrainer::printAndSaveBestIndiviual(int generation) {//needs array to be sorted
     std::cout<<"Best score(minimum): "<<thisGeneration[0].meanScore<<std::endl;
     std::cout<<"saving best individual...\t";
-    thisGeneration[0].savePositionsToFile(-1,true,true);//we save the best individual as a generation with -1
+    //thisGeneration[0].savePositionsToFile(-1,true,true);//we save the best individual as a generation with -1 each time
+    thisGeneration[0].saveDecisionGridToFile(generation);
     return thisGeneration[0].meanScore;
 }
 
@@ -124,7 +125,7 @@ void gameTrainer::train(int nbGereration) {
             std::cout<<ai.meanScore<<",";
         }
         std::cout<<std::endl;
-        printBestScore();
+        printAndSaveBestIndiviual(generationIndex);
 
         //SAVE GENERATION FOR VISUALISATION AND GO TO NEXT GENERATION
         SaveGenerationToFile();

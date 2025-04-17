@@ -33,7 +33,7 @@ public:
     void addTrainingCircuit(std::string filePath);
     void train(int nbGeneration);
     void sortDescendingOrder();
-    int printBestScore();
+    int printAndSaveBestIndiviual(int generation);
     void SaveGenerationToFile();
 };
 

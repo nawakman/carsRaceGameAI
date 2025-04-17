@@ -249,9 +249,15 @@ class carsRace:
                 self.DrawNextPlayerMove()
                 limitIfNoMoveLeft=min(self.currentTurn,len(self.AIMoves[0]))
                 self.DrawMoves(self.AIMoves[0][:limitIfNoMoveLeft],self.AIColors[0])#only display moves up to the current turn
+                ai=self.AIMoves[0]
+                thisMove=ai[min(self.currentTurn,len(ai)-1)]#retrieve 1 because we slices end coord are +1 but index is not
+                self.CheckIfAICrashed(thisMove,0)
             case "specificAI":
                 limitIfNoMoveLeft=min(self.currentTurn,len(self.AIMoves[0]))
                 self.DrawMoves(self.AIMoves[0][:limitIfNoMoveLeft],self.AIColors[0])#only display moves up to the current turn
+                ai=self.AIMoves[0]
+                thisMove=ai[min(self.currentTurn,len(ai)-1)]#retrieve 1 because we slices end coord are +1 but index is not
+                self.CheckIfAICrashed(thisMove,0)
             case "training":
                 self.generationMovesEnded=True#if even a single AI move it will be set back to False
                 for i in range(len(self.AIMoves)):
@@ -510,5 +516,5 @@ def From360To180Range(angle):#from 0,360 to -180,180
 game=carsRace("circuits/pictures/test1.png",10,0.75)
 #game.Play("alone")
 #game.Play("vsAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
-#game.Play("specificAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
-game.Play("training")#path is relative to carsRaceGameAI #you can start from a specific generation using fromGeneration=x argument
+game.Play("specificAI","AI/brains/AI-gen99.bigBrain")#path is relative to carsRaceGameAI #adapt to the last bigbrain file
+#game.Play("training")#path is relative to carsRaceGameAI #you can start from a specific generation using fromGeneration=x argument

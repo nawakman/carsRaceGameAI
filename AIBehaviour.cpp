@@ -311,7 +311,7 @@ void AIPlayer::savePositionsToFile(const int generation, const bool overwriteFil
     std::string filePath;
     for(AIGame game : games) {
         ss.str("");//empty the path so we can prepare the next one
-        ss<<"../AI/"+game.GetCircuitRef().mapName<<"-gen"<<generation<<".txt";
+        ss<<"AI/"+game.GetCircuitRef().mapName<<"-gen"<<generation<<".txt";
         filePath=ss.str();
         //std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
 
@@ -334,7 +334,7 @@ void AIPlayer::savePositionsToFile(const int generation, const bool overwriteFil
 
 void AIPlayer::saveDecisionGridToFile(const int generation) const {
     std::stringstream ss;//handle conversion from int to string
-    ss<<"../AI/AI"<<"-gen"<<generation<<".bigBrain";
+    ss<<"AI/brains/AI"<<"-gen"<<generation<<".bigBrain";
     std::string filePath=ss.str();
     std::ofstream file(filePath);// Create and open a text file
     if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
