@@ -508,5 +508,5 @@ def From360To180Range(angle):#from 0,360 to -180,180
 game=carsRace("circuits/pictures/test1.png",10,0.75)
 #game.Play("alone")
 #game.Play("vsAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
-#game.Play("specificAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
-game.Play("training")#path is relative to carsRaceGameAI
+game.Play("specificAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
+#game.Play("training")#path is relative to carsRaceGameAI

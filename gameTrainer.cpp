@@ -62,8 +62,13 @@ void gameTrainer::train(int nbGereration) {
         }
         sortDescendingOrder();
         //KEEP BEST INDIVIDUALS
+        for(int i=0;i<std::round(keepBestPercentage*nbAIPerGeneration);i++) {
+            newGeneration.push_back(AIPlayer(thisGeneration[i]));//create NEW individual that has a COPY of this individual decisionGrid, so we can discard the previous generation
+        }
+        //KEEP AND MUTATE BEST INDIVIDUALS
         for(int i=0;i<std::round(mutateBestPercentage*nbAIPerGeneration);i++) {
             newGeneration.push_back(AIPlayer(thisGeneration[i]));//create NEW individual that has a COPY of this individual decisionGrid, so we can discard the previous generation
+            newGeneration.back().mutate(mutationRate);//mutate the best individuals so they might have better strategies
         }
 
         //CROSSOVER ,MIX TWO INDIVIDUALS GENES

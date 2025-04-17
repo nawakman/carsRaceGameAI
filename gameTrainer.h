@@ -8,10 +8,13 @@
 #include "AIBehaviour.h"
 
 //https://softwareengineering.stackexchange.com/questions/338611/how-do-we-produce-the-next-generation
-//the sum of the three following must equal 1 (so the numbers of individuals in the next generation is the same as the one in the current generation)
-constexpr float mutateBestPercentage=0.2;
+//the sum of the four following must equal 1 (so the numbers of individuals in the next generation is the same as the one in the current generation)
+constexpr float keepBestPercentage=0.1;
+constexpr float mutateBestPercentage=0.1;
 constexpr float crossoverPercentage=0.7;
 constexpr float generateNewPercentage=0.1;
+
+constexpr float mutationRate=0.2;
 
 class gameTrainer {
     std::vector<AIPlayer> thisGeneration;
