@@ -39,10 +39,10 @@ class carsRace:
         self.LoadMap(mapPictureFile,mapResolution)#this function will set self.windowResolution used by next function
         self.screen=pygame.display.set_mode(self.windowResolution)
    
-    def Play(self,mode="alone",AIBrainFilePath=""):#3 modes, "alone"/"vsAI"/"loadAI"/"training"
+    def Play(self,mode="alone",AIBrainFilePath="",fromGeneration=0):#3 modes, "alone"/"vsAI"/"loadAI"/"training"
         self.mode=mode
         self.generationMovesEnded=False
-        self.currentTurn=1#first turn is 1 not 0
+        self.currentTurn=0
         match mode:
             case "alone":#play alone
                 self.PlayAlone()
@@ -53,7 +53,7 @@ class carsRace:
                 self.GenerateMovesFromAIFile(AIBrainFilePath)
                 self.VisualizeGeneration()
             case "training":#viualize training on current map
-                self.generationCounter=0
+                self.generationCounter=fromGeneration#start at thi generation (defaults to 0)
                 self.LoadAI(f"AI/{self.mapName}-gen{self.generationCounter}.txt")#load first AI moves of the training on this map
                 self.VisualizeGeneration(True)
 
@@ -124,7 +124,7 @@ class carsRace:
                 else:
                     print(f"cannot load next generation: AI/{self.mapName}-gen{self.generationCounter+1}.txt does not exist")
 
-            pygame.time.delay(50)#display a new move each x milliseconds
+            pygame.time.delay(25)#display a new move each x milliseconds
             self.currentTurn+=1
             #print(self.currentTurn)
             #RENDER
@@ -235,8 +235,10 @@ class carsRace:
                         self.end=pygame.math.Vector2(x,y)
 
     def Render(self):
-        self.DrawMap()
-        self.DrawPoints()
+        if self.currentTurn==1:#draw only one time per generation #takes a lot of resources to draw each frame
+            self.DrawMap()
+            self.DrawPoints()
+
         self.DrawCrashes()
         match self.mode:
             case "alone":
@@ -508,5 +510,5 @@ def From360To180Range(angle):#from 0,360 to -180,180
 game=carsRace("circuits/pictures/test1.png",10,0.75)
 #game.Play("alone")
 #game.Play("vsAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
-game.Play("specificAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
-#game.Play("training")#path is relative to carsRaceGameAI
+#game.Play("specificAI","AI/brains/AI-gen0.bigBrain")#path is relative to carsRaceGameAI
+game.Play("training")#path is relative to carsRaceGameAI #you can start from a specific generation using fromGeneration=x argument
