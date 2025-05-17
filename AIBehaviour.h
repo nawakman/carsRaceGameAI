@@ -126,8 +126,9 @@ public:
             }
         }
     }
+    void copyGrid(AIPlayer *other);
     int meanScore=0;
-    void crossover(AIPlayer& other);
+    void crossover(AIPlayer* other, AIPlayer* result);
     char getDecisionGrid(int i, int j, int k, int l, int m, int n) const;
     char getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed, int distanceToFinish);
     void generateBullshitPlayer();

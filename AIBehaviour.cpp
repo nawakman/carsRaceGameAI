@@ -218,12 +218,29 @@ char AIPlayer::getRandomAllowedMove(int frontLeftDistance, int frontDistance, in
     }
 }
 
-void AIPlayer::crossover(AIPlayer& player) {
+void AIPlayer::copyGrid(AIPlayer* other) {
+    for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
+        for (int j=0; j<DIRECTION_SENSOR_RESOLUTION; j++) {//distance in the front direction
+            for (int k=0; k<DIRECTION_SENSOR_RESOLUTION; k++) {//distance in the front right direction
+                for (int l=0; l<ANGLES_RESOLUTION; l++) {
+                    for (int m=0; m<MAX_SPEED; m++) {
+                        for (int n=0; n<DISTANCE_TO_FINISH_RESOLUTION;n++) {
+                            decisionGrid[i][j][k][l][m][n] = other->decisionGrid[i][j][k][l][m][n];
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void AIPlayer::crossover(AIPlayer* player, AIPlayer* result) {
     int nbcases = DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*DISTANCE_TO_FINISH_RESOLUTION;
     int i1 = rand() % nbcases;
     int i2 = rand() % nbcases;
     i1 = std::min(i1, i2);
     i2 = std::max(i1, i2);
+
 
     int count = 0;
     for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
@@ -233,9 +250,21 @@ void AIPlayer::crossover(AIPlayer& player) {
                     for (int m=0; m<MAX_SPEED; m++) {
                         for (int n=0; n<DISTANCE_TO_FINISH_RESOLUTION;n++) {
                             if (count > i1 && count < i2) {
-                                decisionGrid[i][j][k][l][m][n]=player.decisionGrid[i][j][k][l][m][n];
+                                result->decisionGrid[i][j][k][l][m][n]=player->decisionGrid[i][j][k][l][m][n];
+                            }
+                            else {
+                                result->decisionGrid[i][j][k][l][m][n]=this->decisionGrid[i][j][k][l][m][n];
                             }
                             count++;
+
+                            /*
+                            if ((double)rand()/(double)RAND_MAX>0.5){
+                                result->decisionGrid[i][j][k][l][m][n]=player->decisionGrid[i][j][k][l][m][n];
+                            }
+                            else {
+                                result->decisionGrid[i][j][k][l][m][n]=this->decisionGrid[i][j][k][l][m][n];
+                            }
+                            */
                         }
                     }
                 }
@@ -281,7 +310,14 @@ void AIPlayer::playGames() {
 
 void AIPlayer::mutate(float percentage) {//the percentage of mutatation that will happen at random places, relative to the number of elements in the decisionGrid
     int nbCases = DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*DISTANCE_TO_FINISH_RESOLUTION;
-    int nbMutations=(int)percentage*nbCases;
+    // skill issue theo
+    int nbMutations=(int)(percentage*(float)nbCases);
+
+    /*
+    std::cout<<"Percentage : "<<percentage<<std::endl;
+    std::cout<<"nbcases : "<<nbCases<<std::endl;
+    std::cout<<"nbMutations : "<<nbMutations<<std::endl;
+    */
 
     for(int mutation=0;mutation<nbMutations;mutation++) {//same case can be modified many times
         int i=rand()%DIRECTION_SENSOR_RESOLUTION;
