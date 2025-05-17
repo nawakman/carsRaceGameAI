@@ -29,9 +29,7 @@ public:
         this->thisGeneration = std::vector<AIPlayer>(nbAIPerGeneration);
         #pragma omp parallel for
         for (int i=0; i<nbAIPerGeneration; i++) {
-            AIPlayer ai = AIPlayer();
-            ai.generateBullshitPlayer();
-            this->thisGeneration[i]=ai;
+            this->thisGeneration[i].generateBullshitPlayer();
         }
     };
 

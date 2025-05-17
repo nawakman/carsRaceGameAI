@@ -17,5 +17,9 @@ add_executable(generateAIMoves
         circuitFunctions.cpp
 )
 
+find_package(OpenMP REQUIRED)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(carsRaceGameAI PRIVATE OpenMP::OpenMP_CXX)
+endif()
 target_compile_options(carsRaceGameAI PRIVATE -Wall)
 target_compile_options(generateAIMoves PRIVATE -Wall)

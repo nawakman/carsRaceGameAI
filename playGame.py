@@ -511,8 +511,8 @@ def minAngleDistance(fromAngle,toAngle):
 def From360To180Range(angle):#from 0,360 to -180,180
     return angle if angle<=180 else angle-360
 
-game=carsRace("circuits/pictures/hardAF.png",10,0.75)
-#game.Play("alone")
-#game.Play("vsAI","AI/brains/AI-gen499.bigBrain")#path is relative to carsRaceGameAI
-#game.Play("specificAI","AI/brains/AI-gen37.bigBrain")#path is relative to carsRaceGameAI #adapt to the last bigbrain file
-game.Play("training")#path is relative to carsRaceGameAI #you can start from a specific generation using fromGeneration=x argument
+game=carsRace("circuits/pictures/cornerSmallToBig.png",10,0.75)
+game.Play("alone")
+#game.Play("vsAI","AI/brains/AI-gen49.bigBrain")#path is relative to carsRaceGameAI
+#game.Play("specificAI","AI/brains/AI-gen49.bigBrain")#path is relative to carsRaceGameAI #adapt to the last bigbrain file
+#game.Play("training")#path is relative to carsRaceGameAI #you can start from a specific generation using fromGeneration=x argument
