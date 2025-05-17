@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <omp.h>
 
 void gameTrainer::addTrainingCircuit(const std::string filePath) {
     Circuit* c=new Circuit(filePath);//create new circuit outside of local scope
@@ -103,11 +104,15 @@ void gameTrainer::train(int nbGeneration) {
         std::cout<<"AAALLLLLLLOOOOOOOOOOOOOOOO"<<std::endl;
         return;
     }
-    std::vector<AIPlayer> newGeneration;//prepare a container for the next generation
+    std::vector<AIPlayer> newGeneration(thisGeneration.size());//prepare a container for the next generation
     for(int i=0;i<nbGeneration;i++) {
         //for each generation
         newGeneration.clear();//make sure it is empty before filling it with players
-        for(AIPlayer &ai:thisGeneration) {//simulate and score individuals
+        newGeneration.resize(thisGeneration.size());// for parallelisation afterwards
+
+        #pragma omp parallel for
+        for(int j=0; j<thisGeneration.size();j++) {//simulate and score individuals
+            AIPlayer &ai = thisGeneration[j];
             for(Circuit &c:trainingCircuits) {//add all training circuits to the individuals of this generation
                 ai.addGame(&c);
             }
@@ -121,13 +126,14 @@ void gameTrainer::train(int nbGeneration) {
         int min = thisGeneration[0].meanScore;
         int incideBest=0;
         for (int j=0; j<thisGeneration.size(); j++) {
-            if (thisGeneration[i].meanScore < min) {
-                min = thisGeneration[i].meanScore;
-                incideBest = i;
+            if (thisGeneration[j].meanScore < min) {
+                min = thisGeneration[j].meanScore;
+                incideBest = j;
             }
         }
-        newGeneration.push_back(thisGeneration[incideBest]);
+        newGeneration[0] = thisGeneration[incideBest];
 
+        #pragma omp parallel for
         for (int j=1;j<thisGeneration.size();j++) {
             // First inital 2
             AIPlayer* ai1 = pickBestOfRandomPool(thisGeneration, tournament_size);
@@ -142,65 +148,13 @@ void gameTrainer::train(int nbGeneration) {
             else {
                 ai3.copyGrid(ai1);
             }
-            if (((double)rand()/(double)RAND_MAX) > mutatePercentage || 1==1) {
+            if (((double)rand()/(double)RAND_MAX) > mutatePercentage) {
                 // std::cout<<"Currently mutating"<<std::endl;
-            ai3.mutate(mutationRate);
+                ai3.mutate(mutationRate);
             }
-
-
-            newGeneration.push_back(ai3);
-        }
-        /*
-        for(int i=0;i<std::round(keepBestPercentage*nbAIPerGeneration);i++) {
-            newGeneration.push_back(AIPlayer(thisGeneration[i]));//create NEW individual that has a COPY of this individual decisionGrid, so we can discard the previous generation
-        }
-        //KEEP AND MUTATE BEST INDIVIDUALS
-        for(int i=0;i<std::round(mutateBestPercentage*nbAIPerGeneration);i++) {
-            newGeneration.push_back(AIPlayer(thisGeneration[i]));//create NEW individual that has a COPY of this individual decisionGrid, so we can discard the previous generation
-            newGeneration.back().mutate(mutationRate);//mutate the best individuals so they might have better strategies
+            newGeneration[j] = ai3;
         }
 
-        //CROSSOVER ,MIX TWO INDIVIDUALS GENES
-        for(int i=0;i<std::round(crossoverPercentage*nbAIPerGeneration);i++) {
-
-        }
-        */
-        /*
-        for(int i=0;i<thisGeneration.size();i++) {
-            int i1=rand()%thisGeneration.size();
-            int i2=rand()%thisGeneration.size();
-            AIPlayer &ai1=thisGeneration[i1];
-            AIPlayer &ai2=thisGeneration[i2];
-            AIPlayer bestPlayer;
-            AIPlayer worstPlayer;
-            if (ai1.meanScore<ai2.meanScore) {
-                bestPlayer=ai1;
-                worstPlayer=ai2;
-            }
-            else {
-                bestPlayer=ai2;
-                worstPlayer=ai1;
-            }
-            newGeneration.push_back(bestPlayer);
-        }
-
-        for (int i=0;i<newGeneration.size();i++) {
-            // All this shit to generate a random number between 0 and 1
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<double> dist(0.0, 1.0);
-
-            int ai1 = rand() % newGeneration.size();
-            int ai2 = rand() % newGeneration.size();
-            // Possibly crossover
-
-            if (dist(gen)<0.6) {
-                newGeneration[ai1].crossover(newGeneration[ai2]);
-            }// Possibly mutate
-        }
-        thisGeneration=newGeneration;
-    }
-    */
         //GENERATE NEW (might find new strategies)
         /* Nope won't do that
         for(int i=0;i<std::round(generateNewPercentage*nbAIPerGeneration);i++) {
