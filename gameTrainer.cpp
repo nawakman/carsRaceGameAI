@@ -119,7 +119,7 @@ void gameTrainer::train(int nbGeneration) {
             ai.playGames();
         }
         //CROSSOVER OF THE BEST INDIVIDUAL OF 2 RANDOM POOLS
-        int tournament_size = 15;//pool size
+        int tournament_size = 30;//pool size
             //std::max((unsigned long)2, thisGeneration.size()/10);
 
         // find and keep the best one for next generation

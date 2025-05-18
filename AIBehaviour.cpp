@@ -102,34 +102,39 @@ std::array<int,2> AIGame::AngleToDirection(const int angle) {//in degrees
 }
 
 // Distance to obstacle : 1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18-19---------
-// Captor value         : 1-2-3-4-5-6-6-7-7-7 -8 -8 -8 -8 -9 -9 9 9 9 9 9
+// Captor value         : 1-2-3-4-5-6-6-7-7-7 -8 -8 -8 -8  -9 -9 -9 -9 -9 and 0 if nothing for the first 19 tiles
 std::array<int, 3> AIGame::getDistanceCaptors() const {
     std::array<int, 8> distanceCaptorsAllDirections{0};
     std::array<int, 3> distanceCaptors{0};
+    int values[] = {1, 2, 3, 4, 5, 6, 6, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 9};
     int radius=1;
     int direction=0;
-    // radius to 14
-    while (radius<=8) {
+
+    while (radius<=19) {
         for (auto [x, y] : { std::pair{0,1},{-1,1},{-1,0},{-1,-1},{0,-1},{1,-1},{1,0},{1,1} }) {
             // If we haven't processed this direction already
             if (distanceCaptorsAllDirections[direction]==0) {
                 // std::cout << "Processing new direction"<<std::endl;
                 if (circuitRef.invalidPosition(position[0]+x*radius,position[1]+y*radius)) {//ON WHICH MAP ???
                     // std::cout << "Invalid position ! " << position[0]+y << " : " << position[1]+x << std::endl;
-                    distanceCaptorsAllDirections[direction]=radius;
+                    distanceCaptorsAllDirections[direction]=values[radius-1];
                 }
                 // If position is valid check if there's an 'n' on the tile
                 else {
                     if (this->circuitRef.getIJ(position[0]+x*radius,position[1]+y*radius)=='n') {
-                        distanceCaptorsAllDirections[direction]=radius;
+                        distanceCaptorsAllDirections[direction]=values[radius-1];
                     }
                 }
+            }
+            if (radius==19) {
+                distanceCaptorsAllDirections[direction]=0;
             }
             direction+=1;
         }
         direction=0;
         radius+=1;
     }
+
     // Debug
     /*
     std::cout << "Output for distance : " << std::endl;

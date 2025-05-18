@@ -17,7 +17,7 @@ constexpr float crossoverProbability=0.6;
 constexpr float mutateProbability=0.9;
 
 //percentage of the decision array to be mutated
-constexpr float mutationRate=0.2;
+constexpr float mutationRate=0.1;
 
 class gameTrainer {
 
