@@ -101,7 +101,7 @@ AIPlayer* pickBestOfRandomPool(std::vector<AIPlayer>& thisGeneration,
 
 void gameTrainer::train(int nbGeneration) {
     if (nbGeneration==0) {
-        std::cout<<"AAALLLLLLLOOOOOOOOOOOOOOOO"<<std::endl;
+        std::cout<<"PROBLEM: nbGeneration is 0"<<std::endl;
         return;
     }
     std::vector<AIPlayer> newGeneration(thisGeneration.size());//prepare a container for the next generation
@@ -118,11 +118,11 @@ void gameTrainer::train(int nbGeneration) {
             }
             ai.playGames();
         }
-
-        int tournament_size = 15;
+        //CROSSOVER OF THE BEST INDIVIDUAL OF 2 RANDOM POOLS
+        int tournament_size = 15;//pool size
             //std::max((unsigned long)2, thisGeneration.size()/10);
 
-        // We keep the best one
+        // find and keep the best one for next generation
         int min = thisGeneration[0].meanScore;
         int incideBest=0;
         for (int j=0; j<thisGeneration.size(); j++) {
@@ -142,28 +142,20 @@ void gameTrainer::train(int nbGeneration) {
             AIPlayer ai3;
             ai3.meanScore = 0;
             // We crossover with probability of crossoverPercentage
-            if (((double)rand()/(double)RAND_MAX) > crossoverPercentage) {
+            if (((double)rand()/(double)RAND_MAX) > crossoverProbability) {
+                // std::cout<<"Currently mating"<<std::endl;
                 ai1->crossover(ai2,&ai3);
             }
             else {
                 ai3.copyGrid(ai1);
             }
-            if (((double)rand()/(double)RAND_MAX) > mutatePercentage) {
+            if (((double)rand()/(double)RAND_MAX) > mutateProbability) {
                 // std::cout<<"Currently mutating"<<std::endl;
                 ai3.mutate(mutationRate);
             }
             newGeneration[j] = ai3;
         }
-
-        //GENERATE NEW (might find new strategies)
-        /* Nope won't do that
-        for(int i=0;i<std::round(generateNewPercentage*nbAIPerGeneration);i++) {
-            AIPlayer ai = AIPlayer();
-            ai.generateBullshitPlayer();
-            newGeneration.push_back(ai);
-        }
-        */
-
+        
         //INFO ABOUT THIS GENERATION
         /* Commented out for performance ( test )
         std::cout<<"this generation scores"<<std::endl;

@@ -111,7 +111,7 @@ class AIPlayer {
 
 public:
     AIPlayer()= default;//empty constructor
-    AIPlayer(const AIPlayer& other) {//deep copy of decision grid
+    AIPlayer(const AIPlayer& other) {//deep copy of decision grid //same as AIPlayer.copyGrid
         for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
             for (int j=0; j<DIRECTION_SENSOR_RESOLUTION; j++) {//distance in the front direction
                 for (int k=0; k<DIRECTION_SENSOR_RESOLUTION; k++) {//distance in the front right direction
