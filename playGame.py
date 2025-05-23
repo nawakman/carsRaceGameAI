@@ -42,7 +42,7 @@ class carsRace:
     def Play(self,mode="alone",AIBrainFilePath="",fromGeneration=0):#3 modes, "alone"/"vsAI"/"loadAI"/"training"
         self.mode=mode
         self.generationMovesEnded=False
-        self.currentTurn=0
+        self.currentTurn=1 #never 0
         match mode:
             case "alone":#play alone
                 self.PlayAlone()
@@ -70,13 +70,11 @@ class carsRace:
                 self.PlayerMove()
                 if self.IsFinishLine(self.playerMoves[-1]):
                     print("player won")
-                pygame.time.delay(150)
+                pygame.time.delay(175)
             #RENDER
             self.Render()       
 
     def PlayAgainstAI(self):
-        self.playerTurn=True
-
         while True:
             #EVENTS
             for event in pygame.event.get():
@@ -86,25 +84,24 @@ class carsRace:
             self.UpdatePlayerInputs()
 
             #GAMEPLAY
-            if self.playerTurn:
-                if self.mouseState[0]:#left click
-                    self.PlayerMove()
 
-                    if self.IsFinishLine(self.playerMoves[-1]):
-                        print("player won")
+            if self.mouseState[0]:#left click
+                self.PlayerMove()
 
-                    pygame.time.delay(150)
-                    self.playerTurn=False
-            else:
+                if self.IsFinishLine(self.playerMoves[-1]):
+                    print("player won")
+                
                 if not self.NoMoreAIMove(self.AIMoves[0]):#if AI still have moves
                     thisMove=self.AIMoves[0][min(self.currentTurn,len(self.AIMoves[0])-1)]#retrieve 1 because we slices end coord are +1 but index is not
                     self.CheckIfAICrashed(thisMove,0)
+
                     if self.IsFinishLine(self.AIMoves[0][self.currentTurn]):
                         print("AI won")
                 else:
                     print("AI has no more moves, cannot reach finish line") 
-                self.playerTurn=True
                 self.currentTurn+=1
+
+                pygame.time.delay(175)#prevent double click registration
             #RENDER
             self.Render()
 
@@ -120,13 +117,13 @@ class carsRace:
                     print("next generation loaded")
                     self.generationCounter+=1
                     self.LoadAI(f"AI/{self.mapName}-gen{self.generationCounter}.txt")#load next generation
-                    self.currentTurn=0#reset turn
+                    self.currentTurn=1#reset turn #never 0
                 else:
                     print(f"cannot load next generation: AI/{self.mapName}-gen{self.generationCounter+1}.txt does not exist")
 
             pygame.time.delay(25)#display a new move each x milliseconds
-            self.currentTurn+=1
-            #print(self.currentTurn)
+            self.currentTurn+=1#increase before rendering so the value when first calling Render is 2
+
             #RENDER
             self.Render()
 
@@ -235,7 +232,8 @@ class carsRace:
                         self.end=pygame.math.Vector2(x,y)
 
     def Render(self):
-        if self.currentTurn<=1 or self.mode=="alone" or self.mode=="vsAI":#draw only one time per generation #takes a lot of resources to draw each frame
+        #in "alone" and "vsAI" we draw the map each frame to hide player path selection (if we don't do that and move the mouse, all possible player move will be displayed at once)
+        if self.currentTurn<=2 or self.mode=="alone" or self.mode=="vsAI":#draw only one time per generation beacause takes a lot of resources to draw each frame
             self.DrawMap()
             self.DrawPoints()
 
@@ -511,8 +509,8 @@ def minAngleDistance(fromAngle,toAngle):
 def From360To180Range(angle):#from 0,360 to -180,180
     return angle if angle<=180 else angle-360
 
-game=carsRace("circuits/pictures/cornerSmallToBig.png",10,0.75)
-game.Play("alone")
-#game.Play("vsAI","AI/brains/AI-gen49.bigBrain")#path is relative to carsRaceGameAI
-#game.Play("specificAI","AI/brains/AI-gen49.bigBrain")#path is relative to carsRaceGameAI #adapt to the last bigbrain file
-#game.Play("training")#path is relative to carsRaceGameAI #you can start from a specific generation using fromGeneration=x argument
+game=carsRace("circuits/pictures/test1.png",10,0.75)
+#game.Play("alone")
+#game.Play("vsAI","AI/brains/AI-gen91.bigBrain")#path is relative to carsRaceGameAI
+#game.Play("specificAI","AI/brains/AI-gen91.bigBrain")#path is relative to carsRaceGameAI #adapt to the last bigbrain file
+game.Play("training")#path is relative to carsRaceGameAI #you can start from a specific generation using fromGeneration=x argument
