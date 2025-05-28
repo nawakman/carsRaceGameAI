@@ -53,6 +53,7 @@ class carsRace:
                 self.GenerateMovesFromAIFile(AIBrainFilePath)
                 self.VisualizeGeneration()
             case "training":#viualize training on current map
+                self.textFont= pygame.font.Font("VPPixel-Simplified.otf", 40)
                 self.generationCounter=fromGeneration#start at thi generation (defaults to 0)
                 self.LoadAI(f"AI/{self.mapName}-gen{self.generationCounter}.txt")#load first AI moves of the training on this map
                 self.VisualizeGeneration(True)
@@ -237,6 +238,15 @@ class carsRace:
             self.DrawMap()
             self.DrawPoints()
 
+            if self.mode=="training":#display generation counter only one time per generation
+                #make background for texts
+                tempRect = pygame.Rect(10, 20, 170, 40)
+                pygame.draw.rect(self.screen, "BLACK", tempRect)
+                text_surface = self.textFont.render(f"gen {self.generationCounter}", True, "GREEN")
+                text_rect = text_surface.get_rect()
+                text_rect.topleft = (10, 10) # Position in the top-left corner
+                self.screen.blit(text_surface, text_rect)
+
         self.DrawCrashes()
         match self.mode:
             case "alone":
@@ -255,13 +265,22 @@ class carsRace:
                 thisMove=ai[min(self.currentTurn,len(ai)-1)]#retrieve 1 because we slices end coord are +1 but index is not
                 self.CheckIfAICrashed(thisMove,0)
             case "training":
+                #make background for texts
+                tempRect = pygame.Rect(10, 70, 170, 40)
+                pygame.draw.rect(self.screen, "BLACK", tempRect)
+                
+                text_surface = self.textFont.render(f"step {self.currentTurn-1}", True, "GREEN")
+                text_rect = text_surface.get_rect()
+                text_rect.topleft = (10, 60) # Position in the top-left corner
+                self.screen.blit(text_surface, text_rect)
+
                 self.generationMovesEnded=True#if even a single AI move it will be set back to False
                 for i in range(len(self.AIMoves)):
                     ai=self.AIMoves[i]
                     if not self.NoMoreAIMove(ai):#if this ai still have moves
                         self.generationMovesEnded=False
                     limitIfNoMoveLeft=min(self.currentTurn,len(ai))
-                    self.DrawMoves(ai[:limitIfNoMoveLeft],self.AIColors[i])#if an ai finished faster it will have less moves #only draw up to current turn
+                    self.DrawMoves(ai[limitIfNoMoveLeft-2:limitIfNoMoveLeft],self.AIColors[i])#if an ai finished faster it will have less moves #only draw current move 
                     thisMove=ai[min(self.currentTurn,len(ai)-1)]#retrieve 1 because we slices end coord are +1 but index is not
                     self.CheckIfAICrashed(thisMove,i)
 
