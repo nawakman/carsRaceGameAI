@@ -13,13 +13,31 @@
 
 #include <filesystem> // C++17 and later
 /*==============AI GAME==============*/
+void AIGame::playGame() {
+    int maxMoves=50;
+    int i=0;
+    for (i=0; i<maxMoves && circuitRef.getIJ(position[0],position[1])!='e'; i++) {//while not at the finish line //"e" for end
+        //std::cout << i <<"\ti:"<<position[0]<<" j:"<<position[1]<< std::endl;
+        playMoveFromGrid();
+    }
+    // printf("i : %d\ndist : %d\n",i, getDistanceToFinish()*maxMoves/(circuitRef.getHeight()+circuitRef.getWidth()));
+    this->playerRef->meanScore += i + getDistanceToFinish()*maxMoves/(circuitRef.getHeight()+circuitRef.getWidth());//take into account: nb of moves, normalized distance to end scaled by maxMoves
+}
 
-void AIGame::MoveAIPlayer(const char decision){
+void AIGame::playMoveFromGrid() {
+    const std::array<int, 3> distances=getDistanceCaptors();
+    int distToFinish = std::min(getDistanceToFinish()/2,6);
+    const char decision=playerRef->getDecisionGrid(distances[0],distances[1],distances[2],coordsToAngle(position[0],position[1],circuitRef.end[0],circuitRef.end[1]),speed,distToFinish);
+    //std::cout<<"decision: "<<(int) decision<<std::endl;
+    moveAIPlayer(decision);
+}
+
+void AIGame::moveAIPlayer(const char decision){
     std::array<int,2> scannedTile=position;//cpp std::array makes deep copy on assignment
-    const int newAngle=GetNextAngleFromDecision(decision);
+    const int newAngle=getNextAngleFromDecision(decision);
     // std::cout<<"Angle: "<<angle<<" /New angle: "<<newAngle<<std::endl;
-    const std::array<int,2> newDirection=AngleToDirection(newAngle);
-    int newSpeed=GetNextSpeedFromDecision(decision);
+    const std::array<int,2> newDirection=angleToDirection(newAngle);
+    int newSpeed=getNextSpeedFromDecision(decision);
     for(int i=0;i<newSpeed;i++) {
         std::array<int,2> nextTileInDirection={scannedTile[0]+newDirection[0],scannedTile[1]+newDirection[1]};
         //std::cout <<"next tile in direction: "<<circuitRef.getIJ(nextTileInDirection[0],nextTileInDirection[1]) << std::endl;//DEBUG
@@ -44,49 +62,7 @@ void AIGame::MoveAIPlayer(const char decision){
     AIMoves.push_back(scannedTile);
 }
 
-int AIGame::GetNextSpeedFromDecision(const char decision) const{
-    if(decision<8) {
-        return 1;
-    }
-    const int minSpeed=std::max(1,speed-1);//at no point your next speed should be 0
-    const int speedOffset=((decision+1)/3)-4;
-    if((speedOffset==-1 && (speed==0 || speed==1)) || (speedOffset==1 && speed==MAX_SPEED)){
-        std::cout<<"ILLEGAL MOVE, AI tried to go slower than (1 or 0) or faster than NB_SPEEDS"<<std::endl;
-    }
-    return std::clamp(speed+speedOffset,minSpeed,MAX_SPEED);//limit speed
-}
-
-int AIGame::GetNextAngleFromDecision(const char decision) const{
-    if(decision<8) {//decision 0-7 means the player is stopped and can choose any directionç
-        if(speed>0) {
-            std::cout<<"ILLEGAL MOVE, AI is not stopped but tries to force a new direction"<<std::endl;
-        }
-        return 45*decision;
-    }
-    if(speed==0) {
-        std::cout<<"ILLEGAL MOVE, AI is stopped but tries to steer left or right"<<std::endl;
-    }
-    const int angleOffset=45*(((decision+1)%3)-1);//decision 8-15 are when player is already moving
-    return angle+angleOffset;
-}
-
-char AIPlayer::getDecisionGrid(int i, int j, int k, int l, int m, int n) const {
-    return decisionGrid[i][j][k][l][m][n];
-}
-
-int AIGame::getDistanceToFinish() {
-    return std::abs((position[0]-circuitRef.end[0])) + std::abs(circuitRef.end[1] - position[1]);
-}
-
-void AIGame::PlayMoveFromGrid() {
-    const std::array<int, 3> distances=getDistanceCaptors();
-    int distToFinish = std::min(getDistanceToFinish()/2,6);
-    const char decision=playerRef->getDecisionGrid(distances[0],distances[1],distances[2],coordsToAngle(position[0],position[1],circuitRef.end[0],circuitRef.end[1]),speed,distToFinish);
-    //std::cout<<"decision: "<<(int) decision<<std::endl;
-    MoveAIPlayer(decision);
-}
-
-std::array<int,2> AIGame::AngleToDirection(const int angle) {//in degrees
+std::array<int,2> AIGame::angleToDirection(const int angle) {//in degrees
     constexpr std::array<std::array<int,2>,8> angleToDirectionLUT={//lookup table faster than switch
         std::array<int,2>{0,1},//0
         std::array<int,2>{-1,1},//45
@@ -158,6 +134,36 @@ std::array<int, 3> AIGame::getDistanceCaptors() const {
     return distanceCaptors;
 }
 
+int AIGame::getDistanceToFinish() {
+    return std::abs((position[0]-circuitRef.end[0])) + std::abs(circuitRef.end[1] - position[1]);
+}
+
+int AIGame::getNextSpeedFromDecision(const char decision) const{
+    if(decision<8) {
+        return 1;
+    }
+    const int minSpeed=std::max(1,speed-1);//at no point your next speed should be 0
+    const int speedOffset=((decision+1)/3)-4;
+    if((speedOffset==-1 && (speed==0 || speed==1)) || (speedOffset==1 && speed==MAX_SPEED)){
+        std::cout<<"ILLEGAL MOVE, AI tried to go slower than (1 or 0) or faster than NB_SPEEDS"<<std::endl;
+    }
+    return std::clamp(speed+speedOffset,minSpeed,MAX_SPEED);//limit speed
+}
+
+int AIGame::getNextAngleFromDecision(const char decision) const{
+    if(decision<8) {//decision 0-7 means the player is stopped and can choose any directionç
+        if(speed>0) {
+            std::cout<<"ILLEGAL MOVE, AI is not stopped but tries to force a new direction"<<std::endl;
+        }
+        return 45*decision;
+    }
+    if(speed==0) {
+        std::cout<<"ILLEGAL MOVE, AI is stopped but tries to steer left or right"<<std::endl;
+    }
+    const int angleOffset=45*(((decision+1)%3)-1);//decision 8-15 are when player is already moving
+    return angle+angleOffset;
+}
+
 std::string AIGame::getMovesAsString() {
     std::stringstream ss;
     if(AIMoves.empty()){return"";}
@@ -180,37 +186,63 @@ std::string AIGame::getSegmentThatCrashAsString() {
     return movesWithoutLastComma;
 }
 
+const Circuit& AIGame::getCircuitRef() const{
+    return circuitRef;
+}
+
 void AIGame::setDirection(const int i, const int j) {
     this->direction[0]=i;
     this->direction[1]=j;
 }
 
-std::array<int,2> AIGame::GetPosition() const {
+std::array<int,2> AIGame::getPosition() const {
     return position;
 }
-void AIGame::SetPosition(const std::array<int,2> x) {
+
+void AIGame::setPosition(const std::array<int,2> x) {
     position=x;
 }
 
-int AIGame::GetSpeed() const {
+int AIGame::getSpeed() const {
     return speed;
 }
 
-void AIGame::SetSpeed(int x) {
+void AIGame::setSpeed(int x) {
     speed=x;
 }
 
-int AIGame::GetAngle() const {
+int AIGame::getAngle() const {
     return angle;
 }
-void AIGame::SetAngle(int x) {
+
+void AIGame::setAngle(int x) {
     angle=x;
-}
-const Circuit& AIGame::GetCircuitRef() const{
-    return circuitRef;
 }
 
 /*==============AI PLAYER==============*/
+// Full random player, used for gen 1.
+void AIPlayer::generateBullshitPlayer() {
+    for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
+        for (int j=0; j<DIRECTION_SENSOR_RESOLUTION; j++) {//distance in the front direction
+            for (int k=0; k<DIRECTION_SENSOR_RESOLUTION; k++) {//distance in the front right direction
+                for (int l=0; l<ANGLES_RESOLUTION; l++) {
+                    for (int m=0; m<MAX_SPEED; m++) {
+                        for (int n=0; n<DISTANCE_TO_FINISH_RESOLUTION;n++) {
+                            decisionGrid[i][j][k][l][m][n] = getRandomAllowedMove(i,j,k,l,m,n);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void AIPlayer::playGames() {
+    for (auto& game:games) {
+        game.playGame();
+    }
+}
+
 char AIPlayer::getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed,int distanceToFinish){//underscore to differentiate with this.speed
     if(_speed==0) {
         return rand()%8;//choose new direction, speed will be 1
@@ -221,6 +253,10 @@ char AIPlayer::getRandomAllowedMove(int frontLeftDistance, int frontDistance, in
     }else{
         return (rand()%9)+8;//steer left, center right, acceleration and deceleration
     }
+}
+
+char AIPlayer::getDecisionGrid(int i, int j, int k, int l, int m, int n) const {
+    return decisionGrid[i][j][k][l][m][n];
 }
 
 void AIPlayer::copyGrid(AIPlayer* other) {
@@ -237,6 +273,50 @@ void AIPlayer::copyGrid(AIPlayer* other) {
             }
         }
     }
+}
+
+void AIPlayer::savePositionsToFile(const int generation, const bool overwriteFile,bool stfu) {
+    std::stringstream ss;//handle conversion from int to string
+    std::string filePath;
+    for(AIGame game : games) {
+        ss.str("");//empty the path so we can prepare the next one
+        ss<<"AI/"+game.getCircuitRef().mapName<<"-gen"<<generation<<".txt";
+        filePath=ss.str();
+        //std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
+
+        if (overwriteFile) {
+            std::ofstream file(filePath);// Create and open a text file
+            if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
+            file<<game.getCircuitRef().mapName<<std::endl;//if we overwrite file we need to write this
+            file.close();
+        }
+        std::ofstream file(filePath,std::ios::app);//append at the end of existing file
+        if(!file.is_open()){std::cout<<"error opening the file "<<filePath<<std::endl;}
+        file<<game.getMovesAsString()<<std::endl;
+        file<<game.getSegmentThatCrashAsString()<<std::endl;
+        file.close();
+    }
+    if(!stfu) {
+        std::cout<<"positions saved at "<<filePath<<std::endl;
+    }
+}
+
+void AIPlayer::loadDecisionGridFromFile(const std::string& filePath) {
+    std::ifstream file(filePath);// read a text file
+    if(!file.is_open()){std::cout<<"error reading the file "<<filePath<<std::endl;}
+    file.read(&decisionGrid[0][0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*DISTANCE_TO_FINISH_RESOLUTION*sizeof(char));
+    std::cout<<"decisionGrid loaded from "<<filePath<<std::endl;
+}
+
+void AIPlayer::saveDecisionGridToFile(const int generation) const {
+    std::stringstream ss;//handle conversion from int to string
+    ss<<"AI/brains/AI"<<"-gen"<<generation<<".bigBrain";
+    std::string filePath=ss.str();
+    std::ofstream file(filePath);// Create and open a text file
+    if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
+    file.write(&decisionGrid[0][0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*DISTANCE_TO_FINISH_RESOLUTION*sizeof(char));
+    file.close();
+    std::cout<<"decisionGrid saved at "<<filePath<<std::endl;
 }
 
 void AIPlayer::crossover(AIPlayer* player, AIPlayer* result) {
@@ -279,40 +359,6 @@ void AIPlayer::crossover(AIPlayer* player, AIPlayer* result) {
 
 }
 
-// Full random player, used for gen 1.
-void AIPlayer::generateBullshitPlayer() {
-    for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
-        for (int j=0; j<DIRECTION_SENSOR_RESOLUTION; j++) {//distance in the front direction
-            for (int k=0; k<DIRECTION_SENSOR_RESOLUTION; k++) {//distance in the front right direction
-                for (int l=0; l<ANGLES_RESOLUTION; l++) {
-                    for (int m=0; m<MAX_SPEED; m++) {
-                        for (int n=0; n<DISTANCE_TO_FINISH_RESOLUTION;n++) {
-                            decisionGrid[i][j][k][l][m][n] = getRandomAllowedMove(i,j,k,l,m,n);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-void AIGame::playGame() {
-    int maxMoves=50;
-    int i=0;
-    for (i=0; i<maxMoves && circuitRef.getIJ(position[0],position[1])!='e'; i++) {//while not at the finish line //"e" for end
-        //std::cout << i <<"\ti:"<<position[0]<<" j:"<<position[1]<< std::endl;
-        PlayMoveFromGrid();
-    }
-    // printf("i : %d\ndist : %d\n",i, getDistanceToFinish()*maxMoves/(circuitRef.getHeight()+circuitRef.getWidth()));
-    this->playerRef->meanScore += i + getDistanceToFinish()*maxMoves/(circuitRef.getHeight()+circuitRef.getWidth());//take into account: nb of moves, normalized distance to end scaled by maxMoves
-}
-
-void AIPlayer::playGames() {
-    for (auto& game:games) {
-        game.playGame();
-    }
-}
-
 void AIPlayer::mutate(float percentage) {//the percentage of mutatation that will happen at random places, relative to the number of elements in the decisionGrid
     int nbCases = DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*DISTANCE_TO_FINISH_RESOLUTION;
     // skill issue theo
@@ -345,48 +391,4 @@ AIGame* AIPlayer::getGame(const int i) {
         return nullptr;
     }
     return &games[i];
-}
-
-void AIPlayer::savePositionsToFile(const int generation, const bool overwriteFile,bool stfu) {
-    std::stringstream ss;//handle conversion from int to string
-    std::string filePath;
-    for(AIGame game : games) {
-        ss.str("");//empty the path so we can prepare the next one
-        ss<<"AI/"+game.GetCircuitRef().mapName<<"-gen"<<generation<<".txt";
-        filePath=ss.str();
-        //std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
-
-        if (overwriteFile) {
-            std::ofstream file(filePath);// Create and open a text file
-            if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
-            file<<game.GetCircuitRef().mapName<<std::endl;//if we overwrite file we need to write this
-            file.close();
-        }
-        std::ofstream file(filePath,std::ios::app);//append at the end of existing file
-        if(!file.is_open()){std::cout<<"error opening the file "<<filePath<<std::endl;}
-        file<<game.getMovesAsString()<<std::endl;
-        file<<game.getSegmentThatCrashAsString()<<std::endl;
-        file.close();
-    }
-    if(!stfu) {
-        std::cout<<"positions saved at "<<filePath<<std::endl;
-    }
-}
-
-void AIPlayer::saveDecisionGridToFile(const int generation) const {
-    std::stringstream ss;//handle conversion from int to string
-    ss<<"AI/brains/AI"<<"-gen"<<generation<<".bigBrain";
-    std::string filePath=ss.str();
-    std::ofstream file(filePath);// Create and open a text file
-    if(!file.is_open()){std::cout<<"error creating the file "<<filePath<<std::endl;}
-    file.write(&decisionGrid[0][0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*DISTANCE_TO_FINISH_RESOLUTION*sizeof(char));
-    file.close();
-    std::cout<<"decisionGrid saved at "<<filePath<<std::endl;
-}
-
-void AIPlayer::loadDecisionGridFromFile(const std::string& filePath) {
-    std::ifstream file(filePath);// read a text file
-    if(!file.is_open()){std::cout<<"error reading the file "<<filePath<<std::endl;}
-    file.read(&decisionGrid[0][0][0][0][0][0],DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*DIRECTION_SENSOR_RESOLUTION*ANGLES_RESOLUTION*MAX_SPEED*DISTANCE_TO_FINISH_RESOLUTION*sizeof(char));
-    std::cout<<"decisionGrid loaded from "<<filePath<<std::endl;
 }

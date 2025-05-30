@@ -43,6 +43,4 @@ public:
     void SaveGenerationToFile();
 };
 
-
-
 #endif //GAMETRAINER_H

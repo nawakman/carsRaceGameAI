@@ -15,22 +15,24 @@ class Circuit {
     int width;
     int height;
     std::vector<std::vector <char>> circuit;
+    void openCircuit(const std::string& fileName);
     void findStart();
     void findEnd();
-    void openCircuit(const std::string& fileName);
+
 public:
+    mutable std::string mapName;
+    std::array<int,2> start;
+    std::array<int,2> end;
+
     Circuit(const std::string& fileName) {
         openCircuit(fileName);
         findStart();
         findEnd();
     }
-    mutable std::string mapName;
-    std::array<int,2> start;
-    std::array<int,2> end;
+    bool invalidPosition(int i, int j) const;
+    void displayCircuit() const;
     int getHeight() const;
     int getWidth() const;
-    void affiche() const;
-    bool invalidPosition(int i, int j) const;
     char getIJ(int i, int j) const;
 };
 

@@ -5,12 +5,6 @@
 #ifndef GENERATEAIMOVES_H
 #define GENERATEAIMOVES_H
 
-
-
-class generateAIMoves {
-
-};
-
-
+class generateAIMoves {};
 
 #endif //GENERATEAIMOVES_H

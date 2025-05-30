@@ -11,7 +11,7 @@
 
 #include "circuitFunctions.h"
 
-// All actions are defined hereSLOWER means the speed decreases,
+// All actions are defined here
 
 //when the speed is 0 only these 8 movements are allowed
 //the next speed will be one
@@ -47,8 +47,8 @@ constexpr int DISTANCE_TO_FINISH_RESOLUTION=7;
 /* Represents the AI playing the game
  * Its decisionGrid is shaped as follows :
  * decisionGrid[LEFT_SENSOR][FRONT_SENSOR][RIGHT_SENSOR][ANGLE][SPEED][DISTANCE_TO_FINISH_RESOLUTION] = ASSOCIATED_DECISION
- * for instance, decisionGrid[3][4][1][0][8][3] = 2
- * which means that for these values of sensors, we choose action 2 (see actions above)
+ * for instance, decisionGrid[3][4][1][0][8][3] = 11
+ * which means that for these values of sensors, we choose action 11 (see actions above)
 */
 
 class AIGame {
@@ -83,25 +83,26 @@ public:
         return *this;
     }
     void playGame();
-    static std::array<int,2> AngleToDirection(int angle);
+    void playMoveFromGrid();
+    void moveAIPlayer(char decision);//compute next player state when we choose decision x
+    static std::array<int,2> angleToDirection(int angle);
     std::array<int,3> getDistanceCaptors() const;
     int getDistanceToFinish();
-    int GetNextSpeedFromDecision(char decision) const;
-    int GetNextAngleFromDecision(char decision) const;
-    void MoveAIPlayer(char decision);//compute next player state when we choose decision x
-    void PlayMoveFromGrid();
+    int getNextSpeedFromDecision(char decision) const;
+    int getNextAngleFromDecision(char decision) const;
+
     std::string getMovesAsString();
     std::string getSegmentThatCrashAsString();
 
     //if possible put getters and setters at the end
+    const Circuit& getCircuitRef() const;
     void setDirection(int i, int j);// Only for testing, will remove later :
-    std::array<int,2> GetPosition() const;
-    void SetPosition(std::array<int,2> x);
-    int GetSpeed() const;
-    void SetSpeed(int x);
-    int GetAngle() const;
-    void SetAngle(int x);
-    const Circuit& GetCircuitRef() const;
+    std::array<int,2> getPosition() const;
+    void setPosition(std::array<int,2> x);
+    int getSpeed() const;
+    void setSpeed(int x);
+    int getAngle() const;
+    void setAngle(int x);
 };
 
 class AIPlayer {
@@ -110,6 +111,8 @@ class AIPlayer {
     std::vector<AIGame> games;
 
 public:
+    int meanScore=0;
+
     AIPlayer()= default;//empty constructor
     AIPlayer(const AIPlayer& other) {//deep copy of decision grid //same as AIPlayer.copyGrid
         for (int i=0; i<DIRECTION_SENSOR_RESOLUTION; i++) {//distance in the front left direction
@@ -126,28 +129,26 @@ public:
             }
         }
     }
-    void copyGrid(AIPlayer *other);
-    int meanScore=0;
-    void crossover(AIPlayer* other, AIPlayer* result);
-    char getDecisionGrid(int i, int j, int k, int l, int m, int n) const;
-    char getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed, int distanceToFinish);
+
     void generateBullshitPlayer();
-    void addGame(Circuit* circ);
-    AIGame* getGame(int i);
-    void savePositionsToFile(int generation,bool overwriteFile,bool stfu=false);
+    void playGames();
+    char getRandomAllowedMove(int frontLeftDistance, int frontDistance, int frontRightDistance, int _angle, int _speed, int distanceToFinish);
+    char getDecisionGrid(int i, int j, int k, int l, int m, int n) const;
+    void copyGrid(AIPlayer *other);
     void saveDecisionGridToFile(int generation) const;
     void loadDecisionGridFromFile(const std::string& filePath);
-    void playGames();
+    void savePositionsToFile(int generation,bool overwriteFile,bool stfu=false);
+    void crossover(AIPlayer* other, AIPlayer* result);
     void mutate(float percentage);
+    void addGame(Circuit* circ);
+    AIGame* getGame(int i);
 };
 
 inline int PositiveModulo(const int x, const int mod) {//https://stackoverflow.com/questions/14997165/fastest-way-to-get-a-positive-modulo-in-c-c
     return (x % mod + mod) % mod;//the C++ modulo doesn't have the same behaviour as the python one, it can return a negative value
 }
 
-
 inline int coordsToAngle(int i1, int j1, int i2, int j2) {
     return PositiveModulo(static_cast<int>(std::round(std::atan2(i1-i2,j2-j1)/(M_PI/4))),8);
 }
-
 #endif

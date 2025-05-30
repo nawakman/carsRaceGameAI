@@ -9,6 +9,31 @@
 #include <vector>
 #include <filesystem>
 
+// Ouvre un circuit et remplit N, M et le tableau dans la structure associée.
+void Circuit::openCircuit(const std::string& fileName) {
+    mapName=fileName.substr(fileName.rfind('/') + 1);//get last filename after last "/" //https://stackoverflow.com/questions/12261657/how-to-get-last-element-in-tokenized-string-in-c-separated-by
+    mapName=mapName.substr(0, mapName.find("Points.txt")); //get mapName before this string //used to name saved AI files
+    std::cout<<"cpp working directory: "<<std::filesystem::current_path().string()<<std::endl;
+    std::ifstream file(fileName);
+    if (!file) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+    char sep;//separator
+
+    file>>width>>sep>>height;
+    circuit.resize(height);
+
+    std::string tmp;
+    std::getline(file, tmp);
+    for (int i=0;i<width && std::getline(file,tmp);i++) {
+        circuit[i].resize(tmp.size());
+        circuit[i].assign(tmp.begin(),tmp.end());
+    }
+    file.close();
+    std::cout<<"map "<<mapName<<" loaded from "<<fileName<<std::endl;
+}
+
 // Finds start, set to -1,-1 if not found
 void Circuit::findStart() {
     bool found = false;
@@ -49,40 +74,11 @@ void Circuit::findEnd() {
     // Radius around
 }
 
-// Renvoie C si le caractere est pas accessible
-char Circuit::getIJ(int i, int j) const {
-    /*if(invalidPosition(i,j)) {
-        std::cout << "index out of bounds i:"<<i<<" j:"<<j<<" in Circuit::getIJ"<<std::endl;
-    }*/
-    return circuit[i][j];
+bool Circuit::invalidPosition(const int i, const int j) const {
+    return i<0||i>=getHeight()||j<0||j>=getWidth();
 }
 
-// Ouvre un circuit et remplit N, M et le tableau dans la structure associée.
-void Circuit::openCircuit(const std::string& fileName) {
-    mapName=fileName.substr(fileName.rfind('/') + 1);//get last filename after last "/" //https://stackoverflow.com/questions/12261657/how-to-get-last-element-in-tokenized-string-in-c-separated-by
-    mapName=mapName.substr(0, mapName.find("Points.txt")); //get mapName before this string //used to name saved AI files
-    std::cout<<"cpp working directory: "<<std::filesystem::current_path().string()<<std::endl;
-    std::ifstream file(fileName);
-    if (!file) {
-        perror("Error opening file");
-        exit(EXIT_FAILURE);
-    }
-    char sep;//separator
-
-    file>>width>>sep>>height;
-    circuit.resize(height);
-
-    std::string tmp;
-    std::getline(file, tmp);
-    for (int i=0;i<width && std::getline(file,tmp);i++) {
-        circuit[i].resize(tmp.size());
-        circuit[i].assign(tmp.begin(),tmp.end());
-    }
-    file.close();
-    std::cout<<"map "<<mapName<<" loaded from "<<fileName<<std::endl;
-}
-
-void Circuit::affiche () const {
+void Circuit::displayCircuit() const {
     std::cout<<circuit[0][0]<<"\n";
     for (int i=0;i<circuit.size();i++) {
         for (int j=0;j<circuit[i].size();j++) {
@@ -92,13 +88,18 @@ void Circuit::affiche () const {
     }
 }
 
+int Circuit::getHeight() const {
+    return height;
+}
+
 int Circuit::getWidth() const {
     return width;
 }
 
-int Circuit::getHeight() const {
-    return height;
-}
-bool Circuit::invalidPosition(const int i, const int j) const {
-    return i<0||i>=getHeight()||j<0||j>=getWidth();
+// Renvoie C si le caractere est pas accessible
+char Circuit::getIJ(int i, int j) const {
+    /*if(invalidPosition(i,j)) {
+        std::cout << "index out of bounds i:"<<i<<" j:"<<j<<" in Circuit::getIJ"<<std::endl;
+    }*/
+    return circuit[i][j];
 }

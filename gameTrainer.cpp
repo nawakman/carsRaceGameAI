@@ -17,60 +17,7 @@ void gameTrainer::addTrainingCircuit(const std::string filePath) {
     trainingCircuits.push_back(*c);//append this circuit to the list of trainingCircuits
 }
 
-void gameTrainer::sortDescendingOrder() {//the lower the better //best individual at index 0
-    qsort(thisGeneration.data(),thisGeneration.size(),sizeof(AIPlayer),[](const void* a, const void* b) {
-        const auto *playerA = (const AIPlayer *)a;
-        const auto *playerB = (const AIPlayer *)b;
-
-        if (playerA->meanScore < playerB->meanScore) {
-            return -1; // playerA comes before playerB
-        }
-        if (playerA->meanScore > playerB->meanScore) {
-            return 1;  // playerA comes after playerB
-        }
-        return 0;  // playerA and playerB are equal in terms of meanScore
-    });//https://koor.fr/C/cstdlib/qsort.wp
-
-    /*for(AIPlayer &ai:thisGeneration) {
-        std::cout<<ai.meanScore<<std::endl;
-    }*/
-}
-
-int gameTrainer::printAndSaveBestIndiviual(int generation) {//needs array to be sorted
-    int min=thisGeneration[0].meanScore;
-    int max=min;
-    int indiceSave=0;
-    int meanGenerationScore=0;
-    for (int i=0; i<thisGeneration.size(); i++) {
-        meanGenerationScore+=thisGeneration[i].meanScore;
-        if (thisGeneration[i].meanScore < min) {
-            min = thisGeneration[i].meanScore;
-            indiceSave = i;
-        }
-        if (thisGeneration[i].meanScore > max) {
-            max = thisGeneration[i].meanScore;
-        }
-    }
-    meanGenerationScore = meanGenerationScore/thisGeneration.size();
-    std::cout<<"Average generation score: "<<meanGenerationScore<<std::endl;
-    std::cout<<"Worst score(max): "<<max<<std::endl;
-    std::cout<<"Best score(minimum): "<<min<<std::endl;
-    std::cout<<"saving best individual...\t";
-    //thisGeneration[0].savePositionsToFile(-1,true,true);//we save the best individual as a generation with -1 each time
-    thisGeneration[indiceSave].saveDecisionGridToFile(generation);
-    return thisGeneration[indiceSave].meanScore;
-}
-
-void gameTrainer::SaveGenerationToFile(){
-    thisGeneration[0].savePositionsToFile(generationIndex,true);//overwrite the last file
-    for (int i=1;i<thisGeneration.size();i++) {
-        thisGeneration[i].savePositionsToFile(generationIndex,false,true);
-    }
-}
-
-AIPlayer* pickBestOfRandomPool(std::vector<AIPlayer>& thisGeneration,
-                               int tournamentSize)
-{
+AIPlayer* pickBestOfRandomPool(std::vector<AIPlayer>& thisGeneration,int tournamentSize){
     static std::mt19937 rng{ std::random_device{}() };
 
     /* 1. Build a population of pointers */
@@ -96,8 +43,7 @@ AIPlayer* pickBestOfRandomPool(std::vector<AIPlayer>& thisGeneration,
         });
 
     return *bestIt;        // pointer to the champion in thisGeneration
-}
-
+}//not in header file
 
 void gameTrainer::train(int nbGeneration) {
     if (nbGeneration==0) {
@@ -155,7 +101,7 @@ void gameTrainer::train(int nbGeneration) {
             }
             newGeneration[j] = ai3;
         }
-        
+
         //INFO ABOUT THIS GENERATION
         /* Commented out for performance ( test )
         std::cout<<"this generation scores"<<std::endl;
@@ -170,5 +116,56 @@ void gameTrainer::train(int nbGeneration) {
         SaveGenerationToFile();
         generationIndex++;
         thisGeneration=newGeneration;
+    }
+}
+
+void gameTrainer::sortDescendingOrder() {//the lower the better //best individual at index 0
+    qsort(thisGeneration.data(),thisGeneration.size(),sizeof(AIPlayer),[](const void* a, const void* b) {
+        const auto *playerA = (const AIPlayer *)a;
+        const auto *playerB = (const AIPlayer *)b;
+
+        if (playerA->meanScore < playerB->meanScore) {
+            return -1; // playerA comes before playerB
+        }
+        if (playerA->meanScore > playerB->meanScore) {
+            return 1;  // playerA comes after playerB
+        }
+        return 0;  // playerA and playerB are equal in terms of meanScore
+    });//https://koor.fr/C/cstdlib/qsort.wp
+
+    /*for(AIPlayer &ai:thisGeneration) {
+        std::cout<<ai.meanScore<<std::endl;
+    }*/
+}
+
+int gameTrainer::printAndSaveBestIndiviual(int generation) {//needs array to be sorted
+    int min=thisGeneration[0].meanScore;
+    int max=min;
+    int indiceSave=0;
+    int meanGenerationScore=0;
+    for (int i=0; i<thisGeneration.size(); i++) {
+        meanGenerationScore+=thisGeneration[i].meanScore;
+        if (thisGeneration[i].meanScore < min) {
+            min = thisGeneration[i].meanScore;
+            indiceSave = i;
+        }
+        if (thisGeneration[i].meanScore > max) {
+            max = thisGeneration[i].meanScore;
+        }
+    }
+    meanGenerationScore = meanGenerationScore/thisGeneration.size();
+    std::cout<<"Average generation score: "<<meanGenerationScore<<std::endl;
+    std::cout<<"Worst score(max): "<<max<<std::endl;
+    std::cout<<"Best score(minimum): "<<min<<std::endl;
+    std::cout<<"saving best individual...\t";
+    //thisGeneration[0].savePositionsToFile(-1,true,true);//we save the best individual as a generation with -1 each time
+    thisGeneration[indiceSave].saveDecisionGridToFile(generation);
+    return thisGeneration[indiceSave].meanScore;
+}
+
+void gameTrainer::SaveGenerationToFile(){
+    thisGeneration[0].savePositionsToFile(generationIndex,true);//overwrite the last file
+    for (int i=1;i<thisGeneration.size();i++) {
+        thisGeneration[i].savePositionsToFile(generationIndex,false,true);
     }
 }
