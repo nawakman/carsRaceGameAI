@@ -1,3 +1,5 @@
+<b style="color: red;">IMPORTANT NOTE: the compiled files in `./cmake-build-debug` must be launched from `carsRaceGameAI` so you need to edit configurations and set their working directory to `../` </b>
+
 # Evolution simulation using a genetic algorithm
 
 This code allow you to train an AI on a 2D car game by using a genetic algorithm
