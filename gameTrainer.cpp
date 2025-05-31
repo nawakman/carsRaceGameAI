@@ -113,7 +113,7 @@ void gameTrainer::train(int nbGeneration) {
         printAndSaveBestIndiviual(generationIndex);
 
         //SAVE GENERATION FOR VISUALISATION AND GO TO NEXT GENERATION
-        SaveGenerationToFile();
+        saveGenerationToFile();
         generationIndex++;
         thisGeneration=newGeneration;
     }
@@ -163,7 +163,7 @@ int gameTrainer::printAndSaveBestIndiviual(int generation) {//needs array to be 
     return thisGeneration[indiceSave].meanScore;
 }
 
-void gameTrainer::SaveGenerationToFile(){
+void gameTrainer::saveGenerationToFile(){
     thisGeneration[0].savePositionsToFile(generationIndex,true);//overwrite the last file
     for (int i=1;i<thisGeneration.size();i++) {
         thisGeneration[i].savePositionsToFile(generationIndex,false,true);

@@ -40,7 +40,7 @@ public:
     void train(int nbGeneration);
     void sortDescendingOrder();
     int printAndSaveBestIndiviual(int generation);
-    void SaveGenerationToFile();
+    void saveGenerationToFile();
 };
 
 #endif //GAMETRAINER_H
